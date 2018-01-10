@@ -1,0 +1,24 @@
+{
+  "name": "drupal/commerce_xquantity",
+  "type": "drupal-module",
+  "description": "Allows to set quantity field's default_value, step, min, max, prefix and suffix on a form display widget.",
+  "authors": [
+    {
+      "name": "Vladimir Proshin (drugan)",
+      "homepage": "https://www.drupal.org/u/drugan",
+      "role": "Maintainer"
+    }
+  ],
+  "keywords": ["Drupal", "Drupal Commerce"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/commerce_xquantity",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://github.com/drugan/commerce_xquantity/issues",
+    "source": "https://github.com/drugan/commerce_xquantity"
+  },
+  "require": {
+      "drupal/xnumber": "dev-1.x",
+      "drupal/readmehelp": "dev-1.x"
+  }
+}

@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Contains commerce_xquantity.module.
+ */
+
+use Drupal\commerce_xquantity\Entity\XquantityOrderItem;
+use Drupal\commerce_xquantity\Form\XquantityAddTocartForm;
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function commerce_xquantity_entity_type_alter(array &$entity_types) {
+  $entity_types['commerce_order_item']->setClass(XquantityOrderItem::class);
+  $entity_types['commerce_order_item']->setFormClass('add_to_cart', XquantityAddTocartForm::class);
+}
