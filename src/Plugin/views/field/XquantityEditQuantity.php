@@ -3,7 +3,7 @@
 namespace Drupal\commerce_xquantity\Plugin\views\field;
 
 use Drupal\commerce\Context;
-use Drupal\Core\Render\Markup;
+use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_cart\Plugin\views\field\EditQuantity;
 
@@ -31,19 +31,31 @@ class XquantityEditQuantity extends EditQuantity {
       /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
       $order_item = $this->getEntity($row);
       $attr = $order_item->getQuantityWidgetSettings();
+      $default_value = $order_item->getQuantity() + 0;
+
+      if (is_string($attr['#prefix']) && !empty($attr['#prefix'])) {
+        $prefixes = explode('|', $attr['#prefix']);
+        $prefix = (count($prefixes) > 1) ? $this->formatPlural($default_value, $prefixes[0], $prefixes[1]) : $prefixes[0];
+        $attr['#prefix'] = FieldFilteredMarkup::create($prefix);
+      }
+      if (is_string($attr['#suffix']) && !empty($attr['#suffix'])) {
+        $suffixes = explode('|', $attr['#suffix']);
+        $suffix = (count($suffixes) > 1) ? $this->formatPlural($default_value, $suffixes[0], $suffixes[1]) : $suffixes[0];
+        $attr['#suffix'] = FieldFilteredMarkup::create($suffix);
+      }
 
       $form[$this->options['id']][$row_index] = [
         '#type' => 'number',
         '#title' => $this->t('Quantity'),
         '#title_display' => 'invisible',
-        '#default_value' => $order_item->getQuantity() + 0,
+        '#default_value' => $default_value,
         '#size' => 4,
         '#min' => isset($attr['#min']) && is_numeric($attr['#min']) ? $attr['#min'] : '1',
         '#max' => isset($attr['#max']) && is_numeric($attr['#max']) ? $attr['#max'] : '9999',
         '#step' => isset($attr['#step']) && is_numeric($attr['#step']) ? $attr['#step'] : '1',
         '#placeholder' => empty($attr['#placeholder']) ? '' : $attr['#placeholder'],
-        '#field_prefix' => empty($attr['#prefix']) ? '' : Markup::create($attr['#prefix']),
-        '#field_suffix' => empty($attr['#suffix']) ? '' : Markup::create($attr['#suffix']),
+        '#field_prefix' => $attr['#prefix'],
+        '#field_suffix' => $attr['#suffix'],
         // Do not allow to change the default quantity if the quantity widget
         // is hidden on the 'Add to cart' form display.
         '#disabled' => $attr['add_to_cart_quantity_hidden'],
