@@ -4,6 +4,6 @@ description: "Allows to set quantity field's default_value, step, min, max, pref
 core: 8.x
 package: Commerce (contrib)
 dependencies:
-  - commerce_cart
+  - commerce:commerce_cart
   - drupal:xnumber
   - drupal:readmehelp
