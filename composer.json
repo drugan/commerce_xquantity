@@ -18,7 +18,7 @@
     "source": "https://github.com/drugan/commerce_xquantity"
   },
   "require": {
-      "drupal/xnumber": "dev-1.x",
-      "drupal/readmehelp": "dev-1.x"
+      "drupal/xnumber": "^1.0",
+      "drupal/readmehelp": "^1.0"
   }
 }
