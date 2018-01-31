@@ -62,13 +62,13 @@ class XquantityOrderItem extends OrderItem {
    */
   public function getQuantityWidgetSettings() {
     $settings = [];
+    $settings['#disable_on_cart'] = FALSE;
     // If 'Add to cart' form display mode is enabled we prefer its settings
     // because exactly those settings are exposed to and used by a customer.
     $form_display = entity_get_form_display($this->getEntityTypeId(), $this->bundle(), 'add_to_cart');
     $quantity = $form_display->getComponent('quantity');
-    $settings['add_to_cart_quantity_hidden'] = !$quantity;
 
-    if ($settings['add_to_cart_quantity_hidden']) {
+    if (!$quantity) {
       $form_display = entity_get_form_display($this->getEntityTypeId(), $this->bundle(), 'default');
       $quantity = $form_display->getComponent('quantity');
     }

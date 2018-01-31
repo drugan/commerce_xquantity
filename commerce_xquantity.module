@@ -15,3 +15,10 @@ function commerce_xquantity_entity_type_alter(array &$entity_types) {
   $entity_types['commerce_order_item']->setClass(XquantityOrderItem::class);
   $entity_types['commerce_order_item']->setFormClass('add_to_cart', XquantityAddTocartForm::class);
 }
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function commerce_xquantity_field_widget_info_alter(array &$info) {
+  $info['xnumber']['class'] = 'Drupal\commerce_xquantity\Plugin\Field\FieldWidget\XquantityWidget';
+}

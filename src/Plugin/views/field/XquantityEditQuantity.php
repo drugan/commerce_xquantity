@@ -56,9 +56,8 @@ class XquantityEditQuantity extends EditQuantity {
         '#placeholder' => empty($attr['#placeholder']) ? '' : $attr['#placeholder'],
         '#field_prefix' => $attr['#prefix'],
         '#field_suffix' => $attr['#suffix'],
-        // Do not allow to change the default quantity if the quantity widget
-        // is hidden on the 'Add to cart' form display.
-        '#disabled' => $attr['add_to_cart_quantity_hidden'],
+        // Might be disabled on the quantity field form display widget.
+        '#disabled' => $attr['#disable_on_cart'],
       ];
     }
     // Replace the form submit button label.

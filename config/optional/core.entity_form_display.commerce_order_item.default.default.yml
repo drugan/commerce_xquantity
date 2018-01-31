@@ -32,6 +32,7 @@ content:
       default_value: '1'
       prefix: ''
       suffix: ''
+      disable_on_cart: '0'
     third_party_settings: {  }
     region: content
   unit_price:

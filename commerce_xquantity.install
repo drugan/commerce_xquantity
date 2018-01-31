@@ -6,11 +6,13 @@
  */
 
 /**
+ * Implements hook_install().
+ *
  * Update order item xquantity field storage definition.
  *
  * @see https://www.drupal.org/node/2794909
  */
-function commerce_xquantity_update_8400() {
+function commerce_xquantity_install() {
   $config = \Drupal::configFactory();
   $key_value = \Drupal::keyValue('entity.definitions.installed');
   $database = \Drupal::database();
@@ -65,6 +67,7 @@ function commerce_xquantity_update_8400() {
           'step' => '1',
           'prefix' => '',
           'suffix' => '',
+          'disable_on_cart' => '0',
         ];
         $editable->setData($data);
         $editable->save();
@@ -84,9 +87,9 @@ function commerce_xquantity_update_8400() {
   }
 
   if (!empty($updated) && !in_array(FALSE, $updated)) {
-    return t('The order item quantity field definition has been successfully updated.');
+    drupal_set_message(t('The order item quantity field definition has been successfully updated.'));
   }
   else {
-    return t("The attempt to update order item quantity field is failed. To update the field manually go to commerce_order_item table in the site's DB and edit quantity field structure changing its Length to 14,4. Then flush caches and set Xnumber field widget for each of the order item type's enabled form display modes.");
+    drupal_set_message(t("The attempt to update order item quantity field is failed. To update the field manually go to commerce_order_item table in the site's DB and edit quantity field structure changing its Length to 14,4. Then flush caches and set Xnumber field widget for each of the order item type's enabled form display modes."), 'warning');
   }
 }
