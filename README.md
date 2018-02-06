@@ -10,17 +10,36 @@ the [cart#](#0 "Shopping cart page"). More info could be found on
 the [Extended Number Field ↗](https://github.com/drugan/xnumber) module's page,
 on top of which the current module is built.
 
-- [admin/help/commerce_xquantity#set-up](#set-up "Set up")
+
+> Tip: you can see this file in your browser by clicking
+the [admin/help#](#0 "? Help") link at the right of the *Admin toolbar* and then
+the [admin/help/commerce_xquantity#](#0 "Commerce Extended Quantity") link in
+the list.
+
+The module was created as a solution for the following *Drupal Commerce* issues:
+
+- [Issue \#2794909: The quantity "step" must be configurable on the widget level ↗](https://www.drupal.org/node/2794909)
+- [Issue \#2861983: Improve cart behavior when the quantity is 0 or an empty string ↗](https://www.drupal.org/node/2861983)
+- [Issue \#2819041: Quantity limit in Shopping Cart ↗](https://www.drupal.org/node/2819041)
+- [Issue \#2903504: Add form validations in Cartform and in AddToCartForm ↗](https://www.drupal.org/node/2903504)
+- [Issue \#2892207: Increase the default order item quantity precision ↗](https://www.drupal.org/node/2892207)
+- [Issue \#2891190: Updating multiple products in cart \- breaks the cart ↗](https://www.drupal.org/node/2891190)
+
+________________________________________________________________________________
+
+- [admin/help/commerce_xquantity#setup](#setup "Setup")
 - [admin/help/commerce_xquantity#disable-on-cart](#disable-on-cart "Disable on cart")
 - [admin/help/commerce_xquantity#important-notes](#important-notes "Important notes")
-- [admin/help/commerce_xquantity#settings-workflow](#important-notes "Settings workflow")
 - [admin/help/commerce_xquantity#empty-string-or-0-quantity](#empty-string-or-0-quantity "Empty string or 0 quantity")
 - [admin/help/commerce_xquantity#quantity-vs-items-quantity](#quantity-vs-items-quantity "Quantity vs items quantity")
 - [admin/help/commerce_xquantity#module-author](#module-author "Module author")
 - [Commerce Extended Quantity on drupal.org ↗](https://www.drupal.org/project/commerce_xquantity)
 - [Commerce Extended Quantity on github.com ↗](https://github.com/drugan/commerce_xquantity)
 
-## Set up
+________________________________________________________________________________
+
+
+## Setup
 
 If you want to expose *quantity* field for a customer on the *Add to cart* form,
 then go to
@@ -174,7 +193,7 @@ And you'd get this:
 
 ###### Module author:
 ```
-  Vladimir Proshin (drugan)
+  Vlad Proshin (drugan)
   [proshins@gmail.com](proshins@gmail.com)
   [https://drupal.org/u/drugan](https://drupal.org/u/drugan)
 ```
