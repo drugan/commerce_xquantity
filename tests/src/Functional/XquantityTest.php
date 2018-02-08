@@ -58,7 +58,7 @@ class XquantityTest extends CartBrowserTestBase {
     $assert = $this->assertSession();
     $assert->pageTextContains('step: 1');
     $assert->pageTextContains('default_value: 1');
-    $assert->pageTextContains('min: 0');
+    $assert->pageTextContains('min: 1');
     $assert->pageTextContains('max: 9999999999.9999');
     $assert->pageTextContains('base_default_value: 1');
     $assert->pageTextContains('base_step: 0.0001');
@@ -71,9 +71,6 @@ class XquantityTest extends CartBrowserTestBase {
 
     $this->drupalGet('cart');
     $this->assertSession()->fieldValueEquals('edit-edit-quantity-0', '1');
-    // The quantity field which was not exposed on the 'Add to cart' form should
-    // be disabled in the 'Shopping cart' table.
-    $this->assertSession()->fieldDisabled('edit-edit-quantity-0');
 
     // Enable quantity on the 'Add to cart' form mode. Default step = 0.01.
     $widget = entity_get_form_display('commerce_order_item', 'default', 'add_to_cart');
