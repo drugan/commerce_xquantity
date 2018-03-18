@@ -31,11 +31,28 @@ class XquantityAddTocartForm extends AddToCartForm {
       /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
       $order_item = $this->entity;
       if ($purchased_entity = $order_item->getPurchasedEntity()) {
-        $this->formId .= '_' . sha1(serialize($purchased_entity->toArray()));
+        extract($purchased_entity->toArray());
       }
       else {
-        $this->formId .= '_' . sha1(serialize($order_item->toArray()));
+        extract($order_item->toArray());
       }
+      $properties = [
+        'variation_id' => !isset($variation_id) ?: $variation_id,
+        'uuid' => !isset($uuid) ?: $uuid,
+        'type' => !isset($type) ?: $type,
+        'uid' => !isset($uid) ?: $uid,
+        'product_id' => !isset($product_id) ?: $product_id,
+        'sku' => !isset($sku) ?: $sku,
+        'price' => !isset($price) ?: $price,
+        'status' => !isset($status) ?: $status,
+        'created' => !isset($created) ?: $created,
+        'changed' => !isset($changed) ?: $changed,
+        'order_item_id' => !isset($order_item_id) ?: $order_item_id,
+        'order_id' => !isset($order_id) ?: $order_id,
+        'purchased_entity' => !isset($purchased_entity) ?: $purchased_entity,
+        'unit_price' => !isset($unit_price) ?: $unit_price,
+      ];
+      $this->formId .= '_' . sha1(serialize($properties));
     }
     else {
       $base_id = $this->getBaseFormId();
