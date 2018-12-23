@@ -18,15 +18,8 @@ class XquantityEditQuantity extends EditQuantity {
    * {@inheritdoc}
    */
   public function viewsForm(array &$form, FormStateInterface $form_state) {
-    // Make sure we do not accidentally cache this form.
-    $form['#cache']['max-age'] = 0;
-    // The view is empty, abort.
-    if (empty($this->view->result)) {
-      unset($form['actions']);
-      return;
-    }
+    parent::viewsForm($form, $form_state);
 
-    $form[$this->options['id']]['#tree'] = TRUE;
     foreach ($this->view->result as $row_index => $row) {
       /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
       $order_item = $this->getEntity($row);
@@ -60,8 +53,6 @@ class XquantityEditQuantity extends EditQuantity {
         '#disabled' => $attr['#disable_on_cart'],
       ];
     }
-    // Replace the form submit button label.
-    $form['actions']['submit']['#value'] = $this->t('Update cart');
   }
 
   /**
@@ -91,33 +82,6 @@ class XquantityEditQuantity extends EditQuantity {
             '%label' => $purchased_entity->label(),
           ]));
         }
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function viewsFormSubmit(array &$form, FormStateInterface $form_state) {
-    $quantities = $form_state->getValue($this->options['id'], []);
-
-    foreach ($this->view->result as $row_index => $row) {
-      /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
-      $order_item = $this->getEntity($row);
-      if ($quantity = isset($quantities[$row_index])) {
-        $quantity = $quantities[$row_index];
-      }
-      // Remove order item if quantity has no any positive value.
-      if (empty($quantity) || $quantity < 0) {
-        $this->cartManager->removeOrderItem($order_item->getOrder(), $order_item);
-      }
-      elseif ($order_item->getQuantity() != $quantity) {
-        $order_item->setQuantity($quantities[$row_index]);
-        // Otherwise update quantity of order item.
-        $order = $order_item->getOrder();
-        $this->cartManager->updateOrderItem($order, $order_item, FALSE);
-        // Tells commerce_cart_order_item_views_form_submit() to save the order.
-        $form_state->set('quantity_updated', TRUE);
       }
     }
   }
