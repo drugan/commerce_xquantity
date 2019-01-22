@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall functions for the xquantity_stock module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function xquantity_stock_uninstall() {
+  $config = \Drupal::configFactory();
+
+  $configurations = [
+    'system.action.variation_xquantity_stock_adjust',
+    'system.action.variation_xquantity_stock_set',
+  ];
+
+  foreach ($configurations as $name) {
+    if ($configuration = $config->getEditable($name)) {
+      $configuration->delete();
+    }
+  }
+}

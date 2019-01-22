@@ -41,7 +41,7 @@ class XquantityCartBlock extends CartBlock {
     $cart_views = [];
     if (!empty($carts)) {
       $cart_views = $this->getCartViews($carts);
-      foreach ($carts as $cart) {
+      foreach ($carts as $cart_id => $cart) {
         foreach ($cart->getItems() as $order_item) {
           $count += $order_item->getItemsQuantity();
         }

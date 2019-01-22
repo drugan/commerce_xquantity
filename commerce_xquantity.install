@@ -105,7 +105,6 @@ function commerce_xquantity_install() {
  * Implements hook_uninstall().
  *
  * Update order item quantity field storage definition.
- *
  */
 function commerce_xquantity_uninstall() {
   $update_manager = \Drupal::entityDefinitionUpdateManager();

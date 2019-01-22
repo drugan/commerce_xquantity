@@ -5,6 +5,7 @@ namespace Drupal\commerce_xquantity\Form;
 use Drupal\commerce\Context;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_cart\Form\AddToCartForm;
+use Drupal\Component\Utility\NestedArray;
 
 /**
  * Overrides the order item add to cart form.
@@ -88,17 +89,29 @@ class XquantityAddTocartForm extends AddToCartForm {
       return;
     }
     parent::validateForm($form, $form_state);
-
-    /** @var \Drupal\commerce\PurchasableEntityInterface $purchased_entity */
-    $purchased_entity = $order_item->getPurchasedEntity();
-    $store = $this->selectStore($purchased_entity);
-    $context = new Context(\Drupal::currentUser(), $store);
-    $availability = \Drupal::service('commerce.availability_manager');
-    $available = $availability->check($purchased_entity, $quantity, $context);
-    if (!$available) {
-      $form_state->setErrorByName('quantity', $this->t('Unfortunately, the %label is out of stock right at the moment.', [
-        '%label' => $purchased_entity->label(),
-      ]));
+    if ($form_state->getTriggeringElement()['#type'] == 'submit'
+      && ($id = NestedArray::getValue($form, [
+        'purchased_entity',
+        'widget',
+        '0',
+        'variation',
+        '#value',
+      ]))
+    ) {
+      /** @var \Drupal\commerce\PurchasableEntityInterface $purchased_entity */
+      $purchased_entity = $order_item->getPurchasedEntity()::load($id);
+      $store = $this->selectStore($purchased_entity);
+      $context = new Context($this->currentUser, $store, time(), ['xquantity' => 'add_to_cart']);
+      $availability = \Drupal::service('commerce.availability_manager');
+      $available = $availability->check($purchased_entity, $quantity, $context);
+      if (!$available) {
+        $msg = $this->t('Unfortunately, the quantity %quantity of the %label is not available right at the moment.', [
+          '%quantity' => $quantity,
+          '%label' => $purchased_entity->label(),
+        ]);
+        $this->moduleHandler->alter("xquantity_add_to_cart_not_available_msg", $msg, $quantity, $purchased_entity);
+        $form_state->setErrorByName('quantity', $msg);
+      }
     }
   }
 

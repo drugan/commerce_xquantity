@@ -74,13 +74,17 @@ class XquantityEditQuantity extends EditQuantity {
       $order_item = $this->getEntity($row);
       /** @var \Drupal\commerce\PurchasableEntityInterface $purchased_entity */
       $purchased_entity = $order_item->getPurchasedEntity();
-      if (isset($quantities[$row_index]) && $order_item->getQuantity() != $quantities[$row_index]) {
-        $context = new Context(\Drupal::currentUser(), $order_item->getOrder()->getStore());
+      $quantity = $order_item->getQuantity();
+      if (!empty($quantities[$row_index]) && ($quantity != $quantities[$row_index])) {
+        $context = new Context(\Drupal::currentUser(), $order_item->getOrder()->getStore(), time(), ['xquantity' => 'cart', 'old' => $quantity]);
         $available = $availability->check($purchased_entity, $quantities[$row_index], $context);
         if (!$available) {
-          $form_state->setError($form[$this->options['id']][$row_index], $this->t('Unfortunately, the %label is out of stock right at the moment.', [
+          $msg = $this->t('Unfortunately, the quantity %quantity of the %label is not available right at the moment.', [
+            '%quantity' => $quantity,
             '%label' => $purchased_entity->label(),
-          ]));
+          ]);
+          $this->moduleHandler->alter("xquantity_add_to_cart_not_available_msg", $msg, $quantity, $purchased_entity);
+          $form_state->setError($form[$this->options['id']][$row_index], $msg);
         }
       }
     }

@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * Contains xquantity_stock.module.
+ */
+
+/**
+ * Implements hook_TYPE_alter().
+ *
+ * Allows to check if stock support applies to the current product variation.
+ *
+ * @see \Drupal\xquantity_stock\XquantityStockAvailabilityChecker::applies()
+ */
+function xquantity_stock_xquantity_availability_applies_alter(&$applies, $entity) {
+  // Apply your own logic for checking.
+  // if (($entity->id() == 123) || ($entity->bundle() == 'my_variation_type_name')) {
+  //   $applies = FALSE;
+  // }
+}
+
+/**
+ * Implements hook_TYPE_alter().
+ *
+ * Allows to check if the current product variation in stock.
+ *
+ * @see \Drupal\xquantity_stock\XquantityStockAvailabilityChecker::check()
+ */
+function xquantity_stock_xquantity_availability_check_alter(&$available, $quantity, $context) {
+  // Apply your own logic for checking.
+  //   if ($context['context']->getData('xquantity') && ($context['xquantity_stock']->value < 123)) {
+  //     $context['entity']->set($context['xquantity_stock']->getName(), 456)->save();
+  //     $available = TRUE;
+  //   }
+}
+
+/**
+ * Implements hook_TYPE_alter().
+ *
+ * Allows to alter the 'quantity is not available' error message.
+ *
+ * @see \Drupal\commerce_xquantity\Form\XquantityAddTocartForm::validateForm()
+ * @see \Drupal\commerce_xquantity\Form\XquantityAddTocartForm::validateForm()
+ */
+function xquantity_stock_xquantity_add_to_cart_not_available_msg_alter(&$msg, $quantity, $purchased_entity) {
+  // $msg = t('Sorry, the %label is not available with the quantity %quantity.', [
+  //     '%quantity' => $quantity,
+  //     '%label' => $purchased_entity->label(),
+  //   ]);
+}
