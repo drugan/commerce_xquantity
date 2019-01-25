@@ -77,13 +77,13 @@ class XquantityEditQuantity extends EditQuantity {
       $quantity = $order_item->getQuantity();
       if (!empty($quantities[$row_index]) && ($quantity != $quantities[$row_index])) {
         $context = new Context(\Drupal::currentUser(), $order_item->getOrder()->getStore(), time(), ['xquantity' => 'cart', 'old' => $quantity]);
-        $available = $availability->check($purchased_entity, $quantities[$row_index], $context);
+        $available = $purchased_entity && $availability->check($purchased_entity, $quantities[$row_index], $context);
         if (!$available) {
           $msg = $this->t('Unfortunately, the quantity %quantity of the %label is not available right at the moment.', [
             '%quantity' => $quantity,
-            '%label' => $purchased_entity->label(),
+            '%label' => $purchased_entity ? $purchased_entity->label() : $this->t('???'),
           ]);
-          $this->moduleHandler->alter("xquantity_add_to_cart_not_available_msg", $msg, $quantity, $purchased_entity);
+          $purchased_entity && $this->moduleHandler->alter("xquantity_add_to_cart_not_available_msg", $msg, $quantity, $purchased_entity);
           $form_state->setError($form[$this->options['id']][$row_index], $msg);
         }
       }
