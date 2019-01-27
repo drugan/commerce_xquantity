@@ -86,7 +86,7 @@ the *xquantity_stock.module* file:
 
 ********************************************************************************
 
-## Have a good the stock sales!
+## Have a good stock sales!
 
 ###### Module author:
 ```

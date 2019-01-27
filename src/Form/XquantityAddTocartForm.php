@@ -40,18 +40,9 @@ class XquantityAddTocartForm extends AddToCartForm {
       $properties = [
         'variation_id' => !isset($variation_id) ?: $variation_id,
         'uuid' => !isset($uuid) ?: $uuid,
-        'type' => !isset($type) ?: $type,
         'uid' => !isset($uid) ?: $uid,
         'product_id' => !isset($product_id) ?: $product_id,
-        'sku' => !isset($sku) ?: $sku,
-        'price' => !isset($price) ?: $price,
-        'status' => !isset($status) ?: $status,
         'created' => !isset($created) ?: $created,
-        'changed' => !isset($changed) ?: $changed,
-        'order_item_id' => !isset($order_item_id) ?: $order_item_id,
-        'order_id' => !isset($order_id) ?: $order_id,
-        'purchased_entity' => !isset($purchased_entity) ?: $purchased_entity,
-        'unit_price' => !isset($unit_price) ?: $unit_price,
       ];
       $this->formId .= '_' . sha1(serialize($properties));
     }
