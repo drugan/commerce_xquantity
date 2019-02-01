@@ -22,3 +22,18 @@ function commerce_xquantity_entity_type_alter(array &$entity_types) {
 function commerce_xquantity_field_widget_info_alter(array &$info) {
   $info['xnumber']['class'] = 'Drupal\commerce_xquantity\Plugin\Field\FieldWidget\XquantityWidget';
 }
+
+/**
+ * Implements hook_TYPE_alter().
+ *
+ * Allows to alter the 'An Item added to your cart.' message.
+ *
+ * @see \Drupal\commerce_xquantity\Form\XquantityAddTocartForm::submitForm()
+ * @see \Drupal\commerce_cart\EventSubscriber\CartEventSubscriber::displayAddToCartMessage()
+ */
+function commerce_xquantity_xquantity_added_to_cart_msg_alter(&$msg, XquantityAddTocartForm $form) {
+  // $msg = t('Congratulations! @entity added to <a href=":url">your cart</a>.', [
+  //     @entity' => $form->getEntity()->label(),
+  //     ':url' => Drupal\Core\Url::fromRoute('commerce_cart.page')->toString(),
+  //   ]);
+}

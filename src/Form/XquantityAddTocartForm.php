@@ -62,6 +62,25 @@ class XquantityAddTocartForm extends AddToCartForm {
   /**
    * {@inheritdoc}
    */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    parent::submitForm($form, $form_state);
+    $messenger = $this->messenger();
+    $messages = $messenger->messagesByType('status');
+    $messenger->deleteByType('status');
+    foreach ($messages as $msg) {
+      if (preg_match('/\<a href\="\/cart"\>.*\<\/a\>/', $msg->__toString(), $matches)) {
+        $this->moduleHandler->alter("xquantity_added_to_cart_msg", $msg, $this);
+        $messenger->addMessage($msg);
+      }
+      else {
+        $messenger->addMessage($msg);
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
     $order_item = $this->entity;
