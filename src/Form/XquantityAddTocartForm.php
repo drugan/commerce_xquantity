@@ -70,7 +70,7 @@ class XquantityAddTocartForm extends AddToCartForm {
     foreach ($messages as $msg) {
       if (preg_match('/\<a href\="\/cart"\>.*\<\/a\>/', $msg->__toString(), $matches)) {
         $this->moduleHandler->alter("xquantity_added_to_cart_msg", $msg, $this);
-        $messenger->addMessage($msg);
+        $msg && $messenger->addMessage($msg);
       }
       else {
         $messenger->addMessage($msg);

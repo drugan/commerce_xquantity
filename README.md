@@ -191,14 +191,14 @@ And you'd get this:
 
 ## 'An Item added to your cart' message alter
 
-If you want to alter the message shown to a customer when an order item is added
-to a _Shopping cart_ then implement
+If you want to alter or remove the message shown to a customer when an order
+item is added to a _Shopping cart_ then implement
 the **HOOK_xquantity_added_to_cart_msg_alter()**. See the example in
 the *commerce_xquantity.module* file:
 
 ********************************************************************************
 
-@PHPFILE:  commerce_xquantity.module LINE:34 PADD:5 :PHPFILE@
+@PHPFILE:  commerce_xquantity.module LINE:34 PADD:8 :PHPFILE@
 
 ********************************************************************************
 

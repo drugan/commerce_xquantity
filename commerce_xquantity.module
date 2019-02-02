@@ -32,8 +32,11 @@ function commerce_xquantity_field_widget_info_alter(array &$info) {
  * @see \Drupal\commerce_cart\EventSubscriber\CartEventSubscriber::displayAddToCartMessage()
  */
 function commerce_xquantity_xquantity_added_to_cart_msg_alter(&$msg, XquantityAddTocartForm $form) {
+  // Alter the message using data from an order, order item or variation.
   // $msg = t('Congratulations! @entity added to <a href=":url">your cart</a>.', [
   //     @entity' => $form->getEntity()->label(),
   //     ':url' => Drupal\Core\Url::fromRoute('commerce_cart.page')->toString(),
   //   ]);
+  // OR, remove the message.
+  // $msg = NULL;
 }
