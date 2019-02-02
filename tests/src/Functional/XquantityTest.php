@@ -149,13 +149,13 @@ class XquantityTest extends CartBrowserTestBase {
     $this->submitForm($values, t('Update cart'));
     $this->assertSession()->pageTextContains(t('Quantity must be higher than or equal to 1.001.'));
 
-    // An empty string quantity is deemed as expicit intention to delete the
-    // order item.
+    // An attempt to update an order item with empty quantity does not change
+    // anything.
     $values = [
       'edit_quantity[0]' => '',
     ];
     $this->submitForm($values, t('Update cart'));
-    $this->assertSession()->pageTextContains(t('Your shopping cart is empty.'));
+    $this->assertSession()->fieldValueEquals('edit-edit-quantity-0', '1.0015');
   }
 
 }

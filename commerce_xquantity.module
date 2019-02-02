@@ -26,7 +26,7 @@ function commerce_xquantity_field_widget_info_alter(array &$info) {
 /**
  * Implements hook_TYPE_alter().
  *
- * Allows to alter the 'An Item added to your cart.' message.
+ * Allows to alter or remove the 'An Item added to your cart.' message.
  *
  * @see \Drupal\commerce_xquantity\Form\XquantityAddTocartForm::submitForm()
  * @see \Drupal\commerce_cart\EventSubscriber\CartEventSubscriber::displayAddToCartMessage()

@@ -189,7 +189,7 @@ And you'd get this:
 
 ![Right quantities](images/right-quantities.png "Right quantities")
 
-## 'An Item added to your cart' message alter
+## An Item added to your cart message alter
 
 If you want to alter or remove the message shown to a customer when an order
 item is added to a _Shopping cart_ then implement
