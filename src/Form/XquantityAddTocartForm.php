@@ -63,6 +63,37 @@ class XquantityAddTocartForm extends AddToCartForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $item = $price = NULL;
+    $form_object = $form_state->getFormObject();
+    $scale = $form_object->quantityScale ?: 0;
+    $order_item = $this->entity;
+    $quantity = $order_item->getQuantity();
+    $order_type_id = $this->orderTypeResolver->resolve($order_item);
+    $store = $this->selectStore($order_item->getPurchasedEntity());
+    $cart = $this->cartProvider->getCart($order_type_id, $store);
+    if ($cart && ($items = $cart->getItems())) {
+      $matcher = \Drupal::service('commerce_cart.order_item_matcher');
+      if ($item = $matcher->match($order_item, $cart->getItems())) {
+        $quantity = bcadd($quantity, $item->getQuantity(), $scale);
+      }
+    }
+    if ($qty_prices = $form_object->quantityPrices) {
+      foreach ($qty_prices as $qty => $adjustment) {
+        $start = bccomp($qty, $quantity, $scale);
+        $end = $adjustment['end'] ? bccomp($quantity, $adjustment['end'], $scale) : 0;
+        if (($end === 1) || ($start === 1)) {
+          continue;
+        }
+        $price = $adjustment['price'];
+      }
+      if ($price) {
+        $this->entity->setUnitPrice($price, TRUE);
+        if ($item && !$price->equals($item->getUnitPrice())) {
+          $item->setUnitPrice($price, TRUE);
+          $this->cartManager->updateOrderItem($cart, $item, FALSE);
+        }
+      }
+    }
     parent::submitForm($form, $form_state);
     $messenger = $this->messenger();
     $messages = $messenger->messagesByType('status');

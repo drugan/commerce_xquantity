@@ -32,6 +32,8 @@ ________________________________________________________________________________
 - [admin/help/commerce_xquantity#important-notes](#important-notes "Important notes")
 - [admin/help/commerce_xquantity#empty-string-or-0-quantity](#empty-string-or-0-quantity "Empty string or 0 quantity")
 - [admin/help/commerce_xquantity#quantity-vs-items-quantity](#quantity-vs-items-quantity "Quantity vs items quantity")
+- [admin/help/commerce_xquantity#quantity-price-adjustments](#quantity-price-adjustments "Quantity price adjustments")
+- [admin/help/commerce_xquantity#an-item-added-to-your-cart-message-alter](#an-item-added-to-your-cart-message-alter "An Item added to your cart message alter")
 - [admin/help/commerce_xquantity#module-author](#module-author "Module author")
 - [Commerce Extended Quantity on drupal.org ↗](https://www.drupal.org/project/commerce_xquantity)
 - [Commerce Extended Quantity on github.com ↗](https://github.com/drugan/commerce_xquantity)
@@ -189,6 +191,50 @@ And you'd get this:
 
 ![Right quantities](images/right-quantities.png "Right quantities")
 
+## Quantity price adjustments
+
+The module allows to adjust order item price depending on its quantity. First,
+set required number of ranges and save the widget settings. After that set the
+quantity _start_ and _end_ for each range and order item price
+adjustment _operation_ and a _value_ to adjust the price with for the range. The
+quantity range _end_ is optional but if it is set then the range _start_ must be
+less than the _end_. Also, each next quantity range _start_ must be greater than
+the previous range last significant value. Optionally, a user can be notified on
+the quantity price adustment on an _Add to cart_ form and / or _Shopping cart_.
+
+![Quantity price adjustments](images/quantity-price-adjustments.png "Quantity price adjustments")
+
+The quantity price adjustment messages display all required info for a customer
+in order to help them to make a great deal: the quantity to add to
+a _Shopping cart_and the price that will be charged for each order item:
+
+![Quantity price adjustments messages](images/quantity-price-adjustments-msg.png "Quantity price adjustments messages")
+
+The quantity price adjustments defined on an order item type widget can be
+changed dynamically by implementing
+the **HOOK_xquantity_add_to_cart_qty_prices_alter()**. Basically, in
+this _hook_ you can do everything what could be done with
+the [Commerce Pricelist ↗](https://www.drupal.org/node/2784725) module and even
+more. For example, you can remove adjustments for some product or variation
+types based on some condition or change the adjusment data before applying that
+to an order item:
+
+********************************************************************************
+
+@PHPFILE:  commerce_xquantity.module LINE:53 PADD:10 :PHPFILE@
+
+********************************************************************************
+
+The same with the quantity price adjusment messages which could be changed or
+removed in the **HOOK_xquantity_add_to_cart_qty_prices_msg_alter()**. See an
+example:
+
+********************************************************************************
+
+@PHPFILE:  commerce_xquantity.module LINE:73 PADD:4 :PHPFILE@
+
+********************************************************************************
+
 ## An Item added to your cart message alter
 
 If you want to alter or remove the message shown to a customer when an order
@@ -198,7 +244,7 @@ the *commerce_xquantity.module* file:
 
 ********************************************************************************
 
-@PHPFILE:  commerce_xquantity.module LINE:34 PADD:8 :PHPFILE@
+@PHPFILE:  commerce_xquantity.module LINE:35 PADD:8 :PHPFILE@
 
 ********************************************************************************
 

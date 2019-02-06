@@ -7,6 +7,7 @@
 
 use Drupal\commerce_xquantity\Entity\XquantityOrderItem;
 use Drupal\commerce_xquantity\Form\XquantityAddTocartForm;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_entity_type_alter().
@@ -38,5 +39,39 @@ function commerce_xquantity_xquantity_added_to_cart_msg_alter(&$msg, XquantityAd
   //     ':url' => Drupal\Core\Url::fromRoute('commerce_cart.page')->toString(),
   //   ]);
   // OR, remove the message.
+  // $msg = NULL;
+}
+
+/**
+ * Implements hook_TYPE_alter().
+ *
+ * Allows to alter or remove the quantity price adjustments.
+ *
+ * @see \Drupal\commerce_xquantity\Field\FieldWidget\XquantityWidget::formElement()
+ * @see \Drupal\commerce_xquantity\Plugin\views\field\XquantityEditQuantity::viewsForm()
+ */
+function commerce_xquantity_xquantity_add_to_cart_qty_prices_alter(&$form_object, $widget, FormStateInterface $form_state) {
+  // if ($qty_prices = $form_object->quantityPrices) {
+  //   $form_object->quantityPrices = [];
+  //   foreach ($qty_prices as $qty => $adjustment) {
+  //     // Change quantity price adjustments.
+  //     $form_object->quantityPrices[$qty + 1.5] = $adjustment;
+  //   }
+  // }
+  // // OR, remove quantity price adjustments.
+  // $form_object->quantityPrices = NULL;
+}
+
+/**
+ * Implements hook_TYPE_alter().
+ *
+ * Allows to alter or remove the 'Price adjustments for An Item:' message.
+ *
+ * @see \Drupal\commerce_xquantity\Field\FieldWidget\XquantityWidget::formElement()
+ * @see \Drupal\commerce_xquantity\Plugin\views\field\XquantityEditQuantity::viewsForm()
+ */
+function commerce_xquantity_xquantity_add_to_cart_qty_prices_msg_alter(&$msg, $widget, FormStateInterface $form_state) {
+  // $msg = new $msg('Add more -> pay less for the %label!', $msg->getArguments());
+  // // OR, remove the message.
   // $msg = NULL;
 }
