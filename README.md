@@ -193,31 +193,235 @@ And you'd get this:
 
 ## Quantity price adjustments
 
-The module allows to adjust order item price depending on its quantity. First,
-set required number of ranges and save the widget settings. After that set the
-quantity _start_ and _end_ for each range and order item price
-adjustment _operation_ and a _value_ to adjust the price with for the range. The
-quantity range _end_ is optional but if it is set then the range _start_ must be
-less than the _end_. Also, each next quantity range _start_ must be greater than
-the previous range last significant value. Optionally, a user can be notified on
-the quantity price adustment on an _Add to cart_ form and / or _Shopping cart_.
+The module allows to adjust order item price depending on its quantity. An
+alternative module with similar functionality to compare with could be found
+here: [Commerce Pricelist ↗](https://www.drupal.org/node/2784725)
+
+First, set required number of quantity ranges and save the widget settings.
+After that set the quantity _start_ which is the only required field on a range.
+Optionally set additional conditions for this quantity price adjusment to be
+applied. If the _Price list_ checkbox is checked and the respective price exist
+then this price will be applied instead of a regular variation price.
 
 ![Quantity price adjustments](images/quantity-price-adjustments.png "Quantity price adjustments")
 
+### Adjusments explained
+
+Starting from the minimum quantity for this order item type
+(means: _any_ quantity) add `0.99` to each variation price of
+the *physical_var* type. Apply this adjustment on _Friday_s and _Sunday_s
+until `22:00 PM` in case if a user is _anonymous_ and stop running it right
+before the beginning of the 2020 year. Do **NOT** notify user about this
+adjustment:
+
+![Qty start 0.01](images/qty-start-0.01.png "Qty start 0.01")
+
+With the quantity `1.02` through `4.99` subtract `10%` from the price of each
+variation on products having `123` or `456` ID in case if a user
+is _authenticated_. Start this adjusment today at `08:30 AM` and run it forever.
+Notify user about this adjusment:
+
+![Qty start 1.02](images/qty-start-1.02.png "Qty start 1.02")
+
+Starting from the `3.45` quantity subtract `50%` from the price of each product
+variation belonging to the *my_store* store. Run this adjusment forever from
+the `1st March 2019`. Notify user about this adjusment:
+
+![Qty start 3.45](images/qty-start-3.45.png "Qty start 3.45")
+
+Starting from the `1.23` quantity apply _List price_ for the variations
+having `1234` or `5678` ID and do **NOT** adjust this price. Run this adjusment
+from `11:30 AM` to `14:00 PM` on _Monday_s and _Thursday_s for
+a *privileged_buyer*. Notify user about this adjusment:
+
+![Qty start 1.23](images/qty-start-1.23.png "Qty start 1.23")
+
 The quantity price adjustment messages display all required info for a customer
-in order to help them to make a great deal: the quantity to add to
-a _Shopping cart_and the price that will be charged for each order item:
+in order to help them to get a great deal: the quantity to add
+to a _Shopping cart_ and the price that will be charged for each order item:
 
 ![Quantity price adjustments messages](images/quantity-price-adjustments-msg.png "Quantity price adjustments messages")
 
+## Quantity price adjustment settings
+
+
+###### QTY START
+
+The only  field which is **required**. The `step`, `min` and `max` settings of the field are synced with the respective
+quantity field settings. To apply an adjustment for _any_ quantity in
+a _Shopping cart_ set  for this field the `min` value and leave
+the _QTY END_ field empty.
+
+--------------------------------------------------------------------------------
+
+###### QTY END
+
+This field `step`, `min` and `max` settings are synced with the respective
+quantity field settings. Note that if this field has for example, the
+value `1.05` and the next adjustment _QTY START_ field has the value `1.50` then
+product variation quantities `1.06` through `1.49` are **NOT** covered by any of
+the adjustments and will be added to a _Shopping cart_ using the original price.
+Hence, if a customer already has an order item with the `1.05` quantity and got
+a lower price for this item then increasing the quantity to `1.06` the order
+item price and its total will be recalculated with the original order item unit
+price.
+
+--------------------------------------------------------------------------------
+
+###### DATE START
+
+The date to start an adjustment with. Should be in the `YEAR-MONTH-DAY` format.
+See an example value in the field's placeholder. This field does **NOT** need
+if you want to start your adjustment on the current day. The field might be
+useful for automatically starting an adjusment on some day in the future. Can be
+used together with the _TIME START_ and / or _WEEK DAYS_ fields to get a more
+granular adjusment runtime condition settings.
+
+--------------------------------------------------------------------------------
+
+###### DATE END
+
+The date to end an adjustment with. Stops all other date / time settings on an
+adjustment. So, if you set `2020-01-01` value for this field then starting from
+this date the adjustment will **NOT** run anymore.
+
+--------------------------------------------------------------------------------
+
+###### TIME START
+
+The time of the day to start an adjustment with. Must be in a 24-hours time
+format with leading zeroes. See an example value in the field's placeholder. You
+do **NOT** need this field if you want to start an adjustment right now. Might
+be used with the _TIME END_ field to run the adjustment on a particular time
+range or with _DATE START_ and / or _WEEK DAYS_ fields to get a more
+granular adjusment runtime condition settings.
+
+--------------------------------------------------------------------------------
+
+###### TIME END
+
+The time to end an adjustment with disregarding of other date / time settings.
+Might be used with the _TIME START_ field to run the adjustment on a particular
+time range or with _DATE END_ and / or _WEEK DAYS_ fields to get a more
+granular adjusment runtime condition settings. For example, if you set for
+the _DATE END_ `2020-01-01` value then it stops
+right **BEFORE** the _`New Year`_ but if you add `13:00` value for
+the _TIME END_ field then it will stop on the 31st of December 2019 exactly on
+this time.
+
+--------------------------------------------------------------------------------
+
+###### WEEK DAYS
+
+The day(s) of the week to run an adjustment on. Have to be the English name of a
+day. See an example value in the field's placeholder. For multiple values insert
+one value on each line. Might be used together with any of the date / time
+fields.
+
+--------------------------------------------------------------------------------
+
+
+###### VAR IDS
+
+The variation ID(s) to make price adjustment for. For multiple values insert
+one value on each line. Note that variations have to be of a type which is
+bundled with the current order item type. A variation ID can be found by
+visiting parent **product/NNN/variations** page, then clicking on
+the **`Edit`** button at the right of the variation and copying the value from
+a browser address bar:
+
+![Variation ID](images/variation-id.png "Variation ID")
+
+--------------------------------------------------------------------------------
+
+###### PROD IDS
+
+The product ID(s) to make price adjustment for **ALL** its variations. For
+multiple values insert one value on each line. Note that a product have to be
+bundled with this type variation which in its turn is bundled with the current
+order item type. A product ID might be found from a browser address bar by
+visiting its page or its variation(s) edit page. See the image above:
+the **61** is the product ID.
+
+--------------------------------------------------------------------------------
+
+
+###### VAR TYPES
+
+The variation type(s) to make price adjustment for. For multiple values insert
+one value on each line. The types available for the current order item type
+might be seen from the field placeholder.
+
+###### PROD TYPES
+
+The product type(s) to make price adjustment for **ALL** its variations. For
+multiple values insert one value on each line. The types available for the
+current order item type might be seen from the field placeholder.
+
+--------------------------------------------------------------------------------
+
+###### STORES
+
+The store type(s) to make price adjustment for **ALL** its product variations.
+For multiple values insert one value on each line. The types available for the
+current order item type might be seen from the field placeholder. Note that an
+admin should on their own to decide whether this particular store type has
+products pertaining to the current order item type.
+
+--------------------------------------------------------------------------------
+
+###### ROLES
+
+The user role(s) to make price adjustment for. For multiple values insert one
+value on each line. The roles available might be seen from the field
+placeholder. Note that because the information on this field might open
+security vulnerability a user in order to have access to this field's
+placeholder value must have _`administer users`_ permission.
+
+--------------------------------------------------------------------------------
+
+###### LIST PRICE
+
+Whether to apply _List price_ instead of a regular variation price on this
+adjustment. Note if the field does not exist then the regular price will be
+applied.
+
+--------------------------------------------------------------------------------
+
+###### OPERATION
+
+Whether to add or subtract the adjustment value from a price.
+
+--------------------------------------------------------------------------------
+
+###### VALUE
+
+The value to use for a price recalculation.
+
+--------------------------------------------------------------------------------
+
+###### ADJUST TYPE
+
+Whether the value above should be deemed as a _Fixed value_ or a _Percentage_.
+
+--------------------------------------------------------------------------------
+
+###### MSG
+
+Whether to display a message with an adjustment data to help a customer to
+take the right decision. See image above.
+
+--------------------------------------------------------------------------------
+
+
 The quantity price adjustments defined on an order item type widget can be
 changed dynamically by implementing
-the **HOOK_xquantity_add_to_cart_qty_prices_alter()**. Basically, in
-this _hook_ you can do everything what could be done with
-the [Commerce Pricelist ↗](https://www.drupal.org/node/2784725) module and even
-more. For example, you can remove adjustments for some product or variation
-types based on some condition or change the adjusment data before applying that
-to an order item:
+the **HOOK_xquantity_add_to_cart_qty_prices_alter()**. For example, you can
+remove adjustments for some product or variation type based on your custom
+condition or change the adjusment data before applying that to an order item.
+Or, just set the minimum quantity on the _QTY START_ field and leave all the
+rest fields empty in order to use an adjustment as a trigger and then apply your
+own bussiness logic in the _hook_:
 
 ********************************************************************************
 

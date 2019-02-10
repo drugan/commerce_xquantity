@@ -6,9 +6,6 @@ use Drupal\commerce\Context;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_cart\Plugin\views\field\EditQuantity;
-use Drupal\commerce_price\Calculator;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\xnumber\Utility\Xnumber as Numeric;
 
 /**
  * Overrides a form element for editing the order item quantity.
@@ -27,61 +24,8 @@ class XquantityEditQuantity extends EditQuantity {
     foreach ($this->view->result as $row_index => $row) {
       /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
       $order_item = $this->getEntity($row);
-      $settings = [];
-      // Let's remove leading hashes.
-      foreach ($order_item->getQuantityWidgetSettings() as $key => $value) {
-        $settings[ltrim($key, '#')] = $value;
-      }
       $default_value = $order_item->getQuantity() + 0;
-      if ($settings['qty_prices'] && ($count = count($settings['qty_price']))) {
-        $price = $order_item->getPurchasedEntity()->getPrice();
-        $formatter = \Drupal::service('commerce_price.currency_formatter');
-        $list = '';
-        $form_object->quantityScale = Numeric::getDecimalDigits($settings['step']);
-        $form_object->quantityPrices = [];
-        // Roll back to initial price.
-        $form_object->quantityPrices[$settings['step']] = [
-          'price' => $price,
-          'end' => '',
-        ];
-        foreach ($settings['qty_price'] as $index => $qty_price) {
-          extract($qty_price);
-          if ($start && $adjust_value && ($settings['qty_prices'] > $index)) {
-            if ($adjust_type == 'fixed_number') {
-              $adjust_price = new $price($adjust_value, $price->getCurrencyCode());
-            }
-            else {
-              $adjust_price = $price->divide('100')->multiply($adjust_value);
-            }
-            $new = $price->$adjust_op($adjust_price);
-            if ($new->isNegative()) {
-              $new = $new->multiply('0');
-            }
-            $form_object->quantityPrices[$start] = [
-              'price' => $new,
-              'end' => $end,
-            ];
-            $new = $new->toArray();
-            if ($notify) {
-              $li = $this->t('Bye <span style="color:yellow;font-weight: bolder;">%qty</span> or more and get <span style="color:yellow;font-weight: bolder;">%price</span> price for an item', [
-                '%qty' => $start,
-                '%price' => $formatter->format(Calculator::round($new['number'], 2), $new['currency_code']),
-              ]);
-              $list .= "<li>{$li}</li>";
-            }
-          }
-        }
-        $module_handler = \Drupal::moduleHandler();
-        $module_handler->alter("xquantity_add_to_cart_qty_prices", $form_object, $this, $form_state);
-        $form_state->setFormObject($form_object);
-        if ($list) {
-          $msg = new TranslatableMarkup("Price adjustments for the %label:<br><ul>{$list}</ul><hr>", [
-            '%label' => $order_item->label(),
-          ]);
-          $module_handler->alter("xquantity_add_to_cart_qty_prices_msg", $msg, $this, $form_state);
-          $msg && $this->messenger()->addMessage($msg);
-        }
-      }
+      $settings = $order_item->setQuantityPrices($form_object, $this, $form_state);
       if (is_string($settings['prefix']) && !empty($settings['prefix'])) {
         $prefixes = explode('|', $settings['prefix']);
         $prefix = (count($prefixes) > 1) ? $this->formatPlural($default_value, $prefixes[0], $prefixes[1]) : $prefixes[0];
@@ -175,19 +119,8 @@ class XquantityEditQuantity extends EditQuantity {
       }
 
       if ($quantity > 0) {
-        $price = NULL;
-        $form_object = $form_state->getFormObject();
-        $scale = $form_object->quantityScale ?: 0;
-        if ($qty_prices = $form_object->quantityPrices) {
-          foreach ($qty_prices as $qty => $adjustment) {
-            $start = bccomp($qty, $quantity, $scale);
-            $end = $adjustment['end'] ? bccomp($quantity, $adjustment['end'], $scale) : 0;
-            if (($end === 1) || ($start === 1)) {
-              continue;
-            }
-            $price = $adjustment['price'];
-          }
-          if ($price) {
+        if ($purchased_entity = $order_item->getPurchasedEntity()) {
+          if ($price = $order_item->getQuantityPrice($form_state->getFormObject(), $purchased_entity, $quantity)) {
             if (!$price->equals($order_item->getUnitPrice())) {
               $order_item->setUnitPrice($price, TRUE);
             }

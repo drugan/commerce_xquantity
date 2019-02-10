@@ -53,9 +53,9 @@ function commerce_xquantity_xquantity_added_to_cart_msg_alter(&$msg, XquantityAd
 function commerce_xquantity_xquantity_add_to_cart_qty_prices_alter(&$form_object, $widget, FormStateInterface $form_state) {
   // if ($qty_prices = $form_object->quantityPrices) {
   //   $form_object->quantityPrices = [];
-  //   foreach ($qty_prices as $qty => $adjustment) {
+  //   foreach ($qty_prices as $index => $adjustment) {
   //     // Change quantity price adjustments.
-  //     $form_object->quantityPrices[$qty + 1.5] = $adjustment;
+  //     $form_object->quantityPrices[] = $adjustment;
   //   }
   // }
   // // OR, remove quantity price adjustments.
