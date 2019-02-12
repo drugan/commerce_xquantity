@@ -64,17 +64,26 @@ class XquantityAddTocartForm extends AddToCartForm {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $item = NULL;
+    $order_item = $this->entity;
+    $purchased_entity = $order_item->getPurchasedEntity();
+    if (($id = $form_state->getValue('purchased_entity'))) {
+      if (!empty($id[0]['variation']) && ($id[0]['variation'] != $purchased_entity->id())) {
+        $this->setEntity($this->buildEntity($form, $form_state));
+        $order_item = $this->entity;
+        $purchased_entity = $purchased_entity->load($id[0]['variation']);
+        // Reset quantity prices.
+        $order_item->setQuantityPrices($form_state->getFormObject(), $order_item->getFormDisplayWidget(), $form_state);
+      }
+    }
     $form_object = $form_state->getFormObject();
     $scale = $form_object->quantityScale ?: 0;
-    $order_item = $this->entity;
     $quantity = $order_item->getQuantity();
     $order_type_id = $this->orderTypeResolver->resolve($order_item);
-    $purchased_entity = $order_item->getPurchasedEntity();
     $store = $this->selectStore($purchased_entity);
     $cart = $this->cartProvider->getCart($order_type_id, $store);
     if ($cart && ($items = $cart->getItems())) {
       $matcher = \Drupal::service('commerce_cart.order_item_matcher');
-      if ($item = $matcher->match($order_item, $cart->getItems())) {
+      if ($item = $matcher->match($order_item, $items)) {
         $quantity = bcadd($quantity, $item->getQuantity(), $scale);
       }
     }

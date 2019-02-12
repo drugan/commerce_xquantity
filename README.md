@@ -231,7 +231,7 @@ the `1st March 2019`. Notify user about this adjusment:
 
 Starting from the `1.23` quantity apply _List price_ for the variations
 having `1234` or `5678` ID and do **NOT** adjust this price. Run this adjusment
-from `11:30 AM` to `14:00 PM` on _Monday_s and _Thursday_s for
+from `11:30 AM` to `14:00 PM` on _Monday_ s and _Thursday_ s for
 a *privileged_buyer*. Notify user about this adjusment:
 
 ![Qty start 1.23](images/qty-start-1.23.png "Qty start 1.23")
@@ -406,10 +406,11 @@ Whether the value above should be deemed as a _Fixed value_ or a _Percentage_.
 
 --------------------------------------------------------------------------------
 
-###### MSG
+###### NOTIFY
 
 Whether to display a message with an adjustment data to help a customer to
-take the right decision. See image above.
+take the right decision on an _Add to cart_ and / or _Shopping cart_ pages. See
+the image above.
 
 --------------------------------------------------------------------------------
 

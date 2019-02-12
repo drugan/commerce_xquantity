@@ -142,19 +142,22 @@ class XquantityWidget extends XnumberWidget {
           $this->t('<a href=":href" target="_blank">Adjust type</a>', [
             ':href' => '/admin/help/commerce_xquantity#adjust-type',
           ]),
-          $this->t('<a href=":href" target="_blank">Msg</a>', [
-            ':href' => '/admin/help/commerce_xquantity#msg',
+          $this->t('<a href=":href" target="_blank">Notify</a>', [
+            ':href' => '/admin/help/commerce_xquantity#notify',
           ]),
         ],
         '#input' => FALSE,
       ];
       foreach (range(0, ($qty_prices - 1)) as $i) {
-        $qty_start = $qty_end = $date_start = $date_end = $time_start = $time_end = $week_days = $variation_ids = $product_ids = $variation_types = $product_types = $stores = $roles = $list = $adjust_value = $notify = '';
+        $qty_start = $qty_end = $date_start = $date_end = $time_start = $time_end = $week_days = $variation_ids = $product_ids = $variation_types = $product_types = $stores = $roles = $list = $adjust_value = '';
         $adjust_op = 'subtract';
         $adjust_type = 'percentage';
+        $notify = [];
         if (!empty($settings['qty_price'][$i])) {
           extract($settings['qty_price'][$i]);
         }
+        // TODO: Remove this after a while.
+        $notify = (array) $notify;
         $quantity_start = empty($qty_start) && empty($quantity_start) ? $settings['min'] : (empty($qty_start) ? bcadd($settings['min'], $quantity_start, $scale) : $qty_start);
 
         $row = &$element['qty_price'][$i];
@@ -245,7 +248,11 @@ class XquantityWidget extends XnumberWidget {
           '#default_value' => $adjust_type,
         ];
         $row['notify'] = [
-          '#type' => 'checkbox',
+          '#type' => 'checkboxes',
+          '#options' => [
+            'add_to_cart' => $this->t('form', [], ['context' => 'commerce quantity']),
+            'shopping_cart' => $this->t('cart', [], ['context' => 'commerce quantity']),
+          ],
           '#default_value' => $notify,
         ];
       }

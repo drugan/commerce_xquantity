@@ -12,7 +12,6 @@ use Drupal\commerce_price\Calculator;
 use Drupal\xnumber\Utility\Xnumber as Numeric;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormInterface;
-use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\commerce\PurchasableEntityInterface;
 
 /**
@@ -72,11 +71,11 @@ class XquantityOrderItem extends OrderItem {
     $settings['disable_on_cart'] = FALSE;
     // If 'Add to cart' form display mode is enabled we prefer its settings
     // because exactly those settings are exposed to and used by a customer.
-    $form_display = entity_get_form_display($this->getEntityTypeId(), $this->bundle(), 'add_to_cart');
+    $form_display = $this->getFormDisplayWidget();
     $quantity = $form_display->getComponent('quantity');
 
     if (!$quantity) {
-      $form_display = entity_get_form_display($this->getEntityTypeId(), $this->bundle(), 'default');
+      $form_display = $this->getFormDisplayWidget('default');
       $quantity = $form_display->getComponent('quantity');
     }
 
@@ -105,7 +104,7 @@ class XquantityOrderItem extends OrderItem {
   /**
    * {@inheritdoc}
    */
-  public function setQuantityPrices(FormInterface &$form_object, PluginInspectionInterface $widget, FormStateInterface $form_state) {
+  public function setQuantityPrices(FormInterface &$form_object, $widget, FormStateInterface $form_state) {
     $settings = $this->getQuantityWidgetSettings();
     if (empty($settings['qty_prices']) || !($count = count($settings['qty_price'])) || !($purchased_entity = $this->getPurchasedEntity())) {
       return $settings;
@@ -157,9 +156,12 @@ class XquantityOrderItem extends OrderItem {
           'price' => $new,
         ] + $qty_price;
         $new = $new->toArray();
-        if ($notify) {
+        if (($this->isNew() && !empty($notify['add_to_cart'])) || ($this->id() && !empty($notify['shopping_cart']))) {
           $args = [];
           foreach ($qty_price as $key => $value) {
+            if ($key == 'notify') {
+              $value = implode(', ', array_values($qty_price[$key]));
+            }
             $args["%{$key}"] = $value;
           }
           $arguments[] = [
@@ -179,7 +181,21 @@ class XquantityOrderItem extends OrderItem {
         'qty_arguments' => $arguments,
       ]);
       $module_handler->alter("xquantity_add_to_cart_qty_prices_msg", $msg, $widget, $form_state);
-      $msg && $widget->messenger()->addMessage($msg);
+      $messenger = \Drupal::service('messenger');
+      $messages = $messenger->messagesByType('status');
+      $messenger->deleteByType('status');
+      // Make sure the 'Added to cart' message displayed the last.
+      $added_to_cart_msg = NULL;
+      foreach ($messages as $message) {
+        if (preg_match('/\<a href\="\/cart"\>.*\<\/a\>/', $message->__toString(), $matches)) {
+          $added_to_cart_msg = $message;
+        }
+        else {
+          $messenger->addMessage($message);
+        }
+      }
+      $msg && $messenger->addMessage($msg);
+      $added_to_cart_msg && $messenger->addMessage($added_to_cart_msg);
     }
 
     return $settings;
@@ -247,6 +263,13 @@ class XquantityOrderItem extends OrderItem {
     }
 
     return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormDisplayWidget($mode = 'add_to_cart') {
+    return entity_get_form_display($this->getEntityTypeId(), $this->bundle(), $mode);
   }
 
 }
