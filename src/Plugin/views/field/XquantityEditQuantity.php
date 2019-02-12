@@ -105,6 +105,7 @@ class XquantityEditQuantity extends EditQuantity {
     $cart = $order_storage->load($this->view->argument['order_id']->getValue());
     $quantities = $form_state->getValue($this->options['id'], []);
     $save_cart = FALSE;
+    $form_object = $form_state->getFormObject();
     foreach ($quantities as $row_index => $quantity) {
       if (!is_numeric($quantity) || $quantity < 0) {
         // The input might be invalid if the #required or #min attributes
@@ -120,7 +121,8 @@ class XquantityEditQuantity extends EditQuantity {
 
       if ($quantity > 0) {
         if ($purchased_entity = $order_item->getPurchasedEntity()) {
-          if ($price = $order_item->getQuantityPrice($form_state->getFormObject(), $purchased_entity, $quantity)) {
+          $order_item->setQuantityPrices($form_object, $this, $form_state);
+          if ($price = $order_item->getQuantityPrice($form_object, $purchased_entity, $quantity)) {
             if (!$price->equals($order_item->getUnitPrice())) {
               $order_item->setUnitPrice($price, TRUE);
             }
