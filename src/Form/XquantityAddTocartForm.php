@@ -66,32 +66,40 @@ class XquantityAddTocartForm extends AddToCartForm {
     $item = NULL;
     $order_item = $this->entity;
     $purchased_entity = $order_item->getPurchasedEntity();
+    $form_object = $form_state->getFormObject();
     if (($id = $form_state->getValue('purchased_entity'))) {
       if (!empty($id[0]['variation']) && ($id[0]['variation'] != $purchased_entity->id())) {
         $this->setEntity($this->buildEntity($form, $form_state));
         $order_item = $this->entity;
         $purchased_entity = $purchased_entity->load($id[0]['variation']);
         // Reset quantity prices.
-        $order_item->setQuantityPrices($form_state->getFormObject(), $order_item->getFormDisplayWidget(), $form_state);
+        $order_item->setQuantityPrices($form_object, $order_item->getFormDisplayWidget(), $form_state);
       }
     }
-    $form_object = $form_state->getFormObject();
-    $scale = $form_object->quantityScale ?: 0;
-    $quantity = $order_item->getQuantity();
-    $order_type_id = $this->orderTypeResolver->resolve($order_item);
-    $store = $this->selectStore($purchased_entity);
-    $cart = $this->cartProvider->getCart($order_type_id, $store);
-    if ($cart && ($items = $cart->getItems())) {
-      $matcher = \Drupal::service('commerce_cart.order_item_matcher');
-      if ($item = $matcher->match($order_item, $items)) {
-        $quantity = bcadd($quantity, $item->getQuantity(), $scale);
+    if (($qty = $form_state->getValue('quantity'))) {
+      if (!empty($qty[0]['value'])) {
+        $quantity = $qty[0]['value'];
       }
     }
-    if ($price = $order_item->getQuantityPrice($form_object, $purchased_entity, $quantity)) {
-      $this->entity->setUnitPrice($price, TRUE);
-      if ($item && !$price->equals($item->getUnitPrice())) {
-        $item->setUnitPrice($price, TRUE);
-        $this->cartManager->updateOrderItem($cart, $item, FALSE);
+    else {
+      $quantity = $order_item->getQuantity();
+    }
+    if (property_exists($form_object, 'quantityScale') && $scale = $form_object->quantityScale) {
+      $order_type_id = $this->orderTypeResolver->resolve($order_item);
+      $store = $this->selectStore($purchased_entity);
+      $cart = $this->cartProvider->getCart($order_type_id, $store);
+      if ($cart && ($items = $cart->getItems())) {
+        $matcher = \Drupal::service('commerce_cart.order_item_matcher');
+        if ($item = $matcher->match($order_item, $items)) {
+          $quantity = bcadd($quantity, $item->getQuantity(), $scale);
+        }
+      }
+      if ($price = $order_item->getQuantityPrice($form_object, $purchased_entity, $quantity)) {
+        $this->entity->setUnitPrice($price, TRUE);
+        if ($item && !$price->equals($item->getUnitPrice())) {
+          $item->setUnitPrice($price, TRUE);
+          $this->cartManager->updateOrderItem($cart, $item, FALSE);
+        }
       }
     }
     parent::submitForm($form, $form_state);
