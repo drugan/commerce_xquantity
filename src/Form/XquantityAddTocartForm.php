@@ -124,9 +124,9 @@ class XquantityAddTocartForm extends AddToCartForm {
     /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
     $order_item = $this->entity;
     $settings = $order_item->getQuantityWidgetSettings();
-    $default = $step = $settings['#step'] ?: $settings['#base_step'];
-    $min = $settings['#min'] && $step <= $settings['#min'] ? $settings['#min'] : $step;
-    $default = $settings['#default_value'] ?: ($settings['#base_default_value'] ?: $min);
+    $default = $step = $settings['step'] ?: $settings['base_step'];
+    $min = $settings['min'] && $step <= $settings['min'] ? $settings['min'] : $step;
+    $default = $settings['default_value'] ?: ($settings['base_default_value'] ?: $min);
     $value = $form_state->getValue(['quantity', 0, 'value']);
     // If the value is NULL it means the quantity field is disabled.
     $quantity = $value !== NULL ? $value : $default;
