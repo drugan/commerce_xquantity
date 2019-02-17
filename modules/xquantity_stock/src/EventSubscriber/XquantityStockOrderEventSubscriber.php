@@ -107,8 +107,9 @@ class XquantityStockOrderEventSubscriber implements EventSubscriberInterface {
   public function onOrderItemUpdate(OrderItemEvent $event) {
     // Prevent on the Add to cart and Shopping cart update forms.
     if ($this->routeMatch->getParameter('commerce_order')) {
-      $order_item = $event->getOrderItem();
-      $this->updateStock($order_item->getOrder(), $order_item);
+      if (($order_item = $event->getOrderItem()) && ($order = $order_item->getOrder())) {
+        $this->updateStock($order, $order_item);
+      }
     }
   }
 
