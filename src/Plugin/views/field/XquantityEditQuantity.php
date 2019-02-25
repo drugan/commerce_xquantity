@@ -50,7 +50,7 @@ class XquantityEditQuantity extends EditQuantity {
         '#field_prefix' => $settings['prefix'],
         '#field_suffix' => $settings['suffix'],
         // Might be disabled on the quantity field form display widget.
-        '#disabled' => $settings['disable_on_cart'],
+        '#disabled' => isset($settings['disable_on_cart']) ? $settings['disable_on_cart'] : FALSE,
       ];
     }
   }
