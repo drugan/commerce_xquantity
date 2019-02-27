@@ -44,9 +44,9 @@ ________________________________________________________________________________
 ## Setup
 
 If you want to expose *quantity* field for a customer on the *Add to cart* form,
-then go to
-the [admin/commerce/config/order-item-types/default/edit/form-display/add_to_cart](#0 "Default order item") page
-and enable *Quantity* field on the respective form display mode. The default
+then go to the 
+[admin/commerce/config/order-item-types/default/edit/form-display/add_to_cart](#0 "Default order item") 
+page and enable *Quantity* field on the respective form display mode. The default
 order item type is taken as an example. Actually, might be any order item.
 
 ![Quantity settings summary](images/add-to-cart-mode-summary.png
@@ -101,7 +101,7 @@ widget.
 ## Disable on cart
 
 There might be cases when a customer should be disallowed to update quantity in
-a *Shopping cart*. For example, you did not exposed the field on
+a *Shopping cart*. For example, you did not expose the field on
 an *Add to cart* form supposing the default quantity to be added or, the field
 is exposed but you disallow the customer to change their mind on the cart page.
 So, they have just two options: either to continue with checkout or remove order
@@ -146,7 +146,7 @@ Where **ITEM** is any separate item that must be measured in integer value
 measured in decimal up to *4* digits after decimal sign and where one and only
 one **ITEM** is a set of multiple **UNITS**.
 
-Another words, if you have *1.999 g* of pizza in your *Shopping cart* then it is
+In other words, if you have *1.999 g* of pizza in your *Shopping cart* then it is
 considered as *1* item with the quantity of *1.999*. If you have *2.000 g* of
 the pizza then it is the same: *1* item with the quantity of *2.000*. But if
 the *step* on the quantity field is integer and the quantity in
@@ -205,7 +205,7 @@ then this price will be applied instead of a regular variation price.
 
 ![Quantity price adjustments](images/quantity-price-adjustments.png "Quantity price adjustments")
 
-### Adjusments explained
+### Adjustments explained
 
 Starting from the minimum quantity for this order item type
 (means: _any_ quantity) add `0.99` to each variation price of
