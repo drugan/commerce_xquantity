@@ -5,6 +5,7 @@ namespace Drupal\xquantity_stock\Plugin\Field\FieldType;
 use Drupal\xnumber\Plugin\Field\FieldType\XdecimalItem;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\xnumber\Utility\Xnumber as Numeric;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Defines the 'xquantity_stock' field type.
@@ -19,6 +20,55 @@ use Drupal\xnumber\Utility\Xnumber as Numeric;
  * )
  */
 class XquantityStockItem extends XdecimalItem {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function defaultFieldSettings() {
+    return [
+      'threshold' => '1800',
+    ] + parent::defaultFieldSettings();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
+    $element = parent::fieldSettingsForm($form, $form_state);
+    $type_id = $this->getEntity()->getOrderItemTypeId();
+    $form_display = entity_get_form_display('commerce_order_item', $type_id, 'add_to_cart');
+    $quantity = $form_display->getComponent('quantity');
+    if (!$quantity) {
+      $form_display = entity_get_form_display('commerce_order_item', $type_id, 'default');
+      $quantity = $form_display->getComponent('quantity');
+    }
+    if (isset($quantity['settings']['step'])) {
+      $settings = $form_display->getRenderer('quantity')->getFormDisplayModeSettings();
+    }
+    if (!empty($settings['step'])) {
+      $element['step']['#step'] = $settings['step'];
+      $element['min']['#step'] = $settings['step'];
+      $element['max']['#step'] = $settings['step'];
+    }
+    if (!empty($settings['min'])) {
+      $element['step']['#min'] = $settings['min'];
+      $element['min']['#min'] = $settings['min'];
+      $element['max']['#min'] = $settings['min'];
+    }
+
+    $element['threshold'] = [
+      '#type' => 'number',
+      '#step' => '1',
+      '#field_suffix' => $this->t('seconds', [], ['context' => 'xquantity stock']),
+      '#title' => $this->t('Threshold', [], ['context' => 'xquantity stock']),
+      '#description' => $this->t('Stock rotation threshold. Read more: <a href=":href" target="_blank">admin/help/xquantity_stock#stock-rotation</a>', [
+        ':href' => '/admin/help/xquantity_stock#stock-rotation',
+      ]),
+      '#default_value' => $this->getSetting('threshold'),
+    ];
+
+    return $element;
+  }
 
   /**
    * {@inheritdoc}

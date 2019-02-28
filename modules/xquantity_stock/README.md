@@ -27,6 +27,26 @@ the _quantity_ field settings on the _Add to cart_ mode widget of the related
 order item type. Just because the stock should be increased / decreased with the
 same `step` as the variation _quantity_ in a customer _Shopping cart_.
 
+## Stock rotation
+
+Optionally, you can set the number of seconds to consider a Shopping cart
+an abandoned one. Leave this field empty to not rotate the stock.
+
+Let's say a customer _A_ added some quantity to a cart and does not done any
+changes in their cart for some amount of time. Then a
+customer _B_ attempts _Add to cart_ a quantity which is not available on a
+variation stock but exist on an order item in the customer _A_ cart and may be
+other carts. In this case order item(s) in the abandoned cart(s) will be
+automatically removed to return this quantity to the stock and make it available
+for customers to buy.
+
+Then, if the customer _A_ returns to the site and sees that earlier added order
+item has disappeared and attempts add this variation which is now in the
+abandoned cart of the customer _B_ then this order item will be removed
+releasing this quantity for the customer _A_ . This rotation will continue until
+some of them will complete the order.
+
+![Stock rotation](images/stock-rotation.png "Stock rotation")
 
 If multiple variation types use the same common order
 item type then after the first **Xquantity Stock** field is added to a variation

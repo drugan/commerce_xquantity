@@ -40,7 +40,18 @@ class VariationXquantityStockSet extends ConfigurableActionBase {
         if ($definition->getType() == 'xquantity_stock') {
           $xquantity_stock = TRUE;
           $form_state->set('xquantity_stock', $definition->getName());
-          $settings = $definition->getFieldStorageDefinition()->getSettings();
+          $settings = [];
+          $type_id = $variation->getOrderItemTypeId();
+          $form_display = entity_get_form_display('commerce_order_item', $type_id, 'add_to_cart');
+          $quantity = $form_display->getComponent('quantity');
+          if (!$quantity) {
+            $form_display = entity_get_form_display('commerce_order_item', $type_id, 'default');
+            $quantity = $form_display->getComponent('quantity');
+          }
+          if (isset($quantity['settings']['step'])) {
+            $settings = $form_display->getRenderer('quantity')->getFormDisplayModeSettings();
+          }
+          $settings += $definition->getFieldStorageDefinition()->getSettings();
           break;
         }
       }
@@ -61,10 +72,11 @@ class VariationXquantityStockSet extends ConfigurableActionBase {
 
         $form['stock']['set_value'] = [
           '#type' => 'number',
-          '#step' => pow(0.1, $settings['scale']),
+          '#step' => !empty($settings['step']) ? $settings['step'] : pow(0.1, $settings['scale']),
+          '#min' => !empty($settings['min']) ? $settings['min'] : ($settings['unsigned'] ? '0' : ''),
         ];
-        if ($settings['unsigned']) {
-          $form['stock']['set_value']['#min'] = '0';
+        if (!empty($settings['default_value'])) {
+          $form['stock']['set_value']['#default_value'] = $settings['default_value'];
         }
       }
       $form['cancel'] = [

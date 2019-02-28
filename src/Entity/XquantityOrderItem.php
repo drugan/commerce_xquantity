@@ -13,6 +13,7 @@ use Drupal\xnumber\Utility\Xnumber as Numeric;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\commerce\PurchasableEntityInterface;
+use Drupal\commerce\Context;
 
 /**
  * Overrides the order item entity class.
@@ -271,6 +272,56 @@ class XquantityOrderItem extends OrderItem {
    */
   public function getFormDisplayWidget($mode = 'add_to_cart') {
     return entity_get_form_display($this->getEntityTypeId(), $this->bundle(), $mode);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function rotateStock(PurchasableEntityInterface $entity, $quantity, Context $context) {
+    foreach (array_reverse($entity->getFieldDefinitions()) as $definition) {
+      if ($definition->getType() == 'xquantity_stock') {
+        $field_name = $definition->getName();
+        $xquantity_stock = $entity->get($field_name);
+        $value = $xquantity_stock->value;
+        break;
+      }
+    }
+    if (empty($xquantity_stock) || !($threshold = $xquantity_stock->getSetting('threshold'))) {
+      return;
+    }
+    $scale = Numeric::getDecimalDigits($xquantity_stock->getSetting('step'));
+    $storage = \Drupal::entityTypeManager()->getStorage('commerce_order');
+    $query = $storage->getQuery();
+    $query->accessCheck(FALSE);
+    $time = time() - $threshold;
+    $query->condition('changed', $time, '<');
+    $query->condition('cart', '1', '=');
+    $query->condition('locked', '0', '=');
+    $order_type_id = \Drupal::service('commerce_order.chain_order_type_resolver')->resolve($this);
+    $store = $context->getStore();
+    $cart = \Drupal::service('commerce_cart.cart_provider')->getCart($order_type_id, $store);
+    if ($cart) {
+      $query->condition('order_id', $cart->id(), '<>');
+    }
+    if ($orders = $query->execute()) {
+      $storage = \Drupal::entityTypeManager()->getStorage('commerce_order_item');
+      $query = $storage->getQuery();
+      $query->accessCheck(FALSE);
+      $query->condition('order_id', $orders, 'IN');
+      $query->condition('purchased_entity', $entity->id(), '=');
+      $query->sort('changed');
+      if ($order_items = $query->execute()) {
+        $cart_manager = \Drupal::service('commerce_cart.cart_manager');
+        $qty = 0;
+        foreach ($storage->loadMultiple($order_items) as $order_item) {
+          $qty = bcadd($qty, $order_item->getQuantity(), $scale);
+          $cart_manager->removeOrderItem($order_item->getOrder(), $order_item);
+          if ((bccomp($qty, $quantity, $scale) !== -1)) {
+            return TRUE;
+          }
+        }
+      }
+    }
   }
 
 }

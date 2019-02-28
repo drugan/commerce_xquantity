@@ -149,10 +149,17 @@ class XquantityAddTocartForm extends AddToCartForm {
     ) {
       /** @var \Drupal\commerce\PurchasableEntityInterface $purchased_entity */
       $purchased_entity = $order_item->getPurchasedEntity()::load($id);
-      $store = $this->selectStore($purchased_entity);
-      $context = new Context($this->currentUser, $store, time(), ['xquantity' => 'add_to_cart']);
-      $availability = \Drupal::service('commerce.availability_manager');
-      $available = $purchased_entity && $availability->check($purchased_entity, $quantity, $context);
+      if ($available = $purchased_entity) {
+        $store = $this->selectStore($purchased_entity);
+        $context = new Context($this->currentUser, $store, time(), [
+          'xquantity' => 'add_to_cart',
+        ]);
+        $availability = \Drupal::service('commerce.availability_manager');
+        $available = $availability->check($purchased_entity, $quantity, $context);
+        if (!$available && $order_item->rotateStock($purchased_entity, $quantity, $context)) {
+          $available = $availability->check($purchased_entity, $quantity, $context);
+        }
+      }
       if (!$available) {
         $msg = $this->t('Unfortunately, the quantity %quantity of the %label is not available right at the moment.', [
           '%quantity' => $quantity,

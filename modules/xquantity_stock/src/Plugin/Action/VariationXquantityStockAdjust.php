@@ -7,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\xnumber\Utility\Xnumber;
+use Drupal\xnumber\Utility\Xnumber as Numeric;
 
 /**
  * Adjust variation stock.
@@ -41,7 +41,18 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
         if ($definition->getType() == 'xquantity_stock') {
           $xquantity_stock = TRUE;
           $form_state->set('xquantity_stock', $definition->getName());
-          $settings = $definition->getFieldStorageDefinition()->getSettings();
+          $settings = [];
+          $type_id = $variation->getOrderItemTypeId();
+          $form_display = entity_get_form_display('commerce_order_item', $type_id, 'add_to_cart');
+          $quantity = $form_display->getComponent('quantity');
+          if (!$quantity) {
+            $form_display = entity_get_form_display('commerce_order_item', $type_id, 'default');
+            $quantity = $form_display->getComponent('quantity');
+          }
+          if (isset($quantity['settings']['step'])) {
+            $settings = $form_display->getRenderer('quantity')->getFormDisplayModeSettings();
+          }
+          $settings += $definition->getFieldStorageDefinition()->getSettings();
           break;
         }
       }
@@ -68,10 +79,11 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
         ];
         $form['stock']['adjust_value'] = [
           '#type' => 'number',
-          '#step' => pow(0.1, $settings['scale']),
+          '#step' => !empty($settings['step']) ? $settings['step'] : pow(0.1, $settings['scale']),
+          '#min' => !empty($settings['min']) ? $settings['min'] : ($settings['unsigned'] ? '0' : ''),
         ];
-        if ($settings['unsigned']) {
-          $form['stock']['adjust_value']['#min'] = '0';
+        if (!empty($settings['default_value'])) {
+          $form['stock']['adjust_value']['#default_value'] = $settings['default_value'];
         }
         $form['stock']['adjust_type'] = [
           '#type' => 'select',
@@ -80,6 +92,8 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
             'percentage' => $this->t('Percentage'),
           ],
         ];
+        $scale = Numeric::getDecimalDigits($form['stock']['adjust_value']['#step']);
+        $form_state->set('xquantity_stock_scale', $scale);
       }
       $form['cancel'] = [
         '#type' => 'submit',
@@ -105,9 +119,9 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
         return;
       }
       $op = $values['adjust_op'] == 'add' ? 'bcadd' : 'bcsub';
+      $scale = $form_state->get('xquantity_stock_scale');
       foreach ($form_state->get('variations') as $variation) {
         $stock = $variation->get($xquantity_stock)->value;
-        $scale = Xnumber::getDecimalDigits($stock);
         if ($values['adjust_type'] == 'fixed_number') {
           $quantity = $op($stock, $value, $scale);
         }

@@ -5,7 +5,7 @@ namespace Drupal\xquantity_stock;
 use Drupal\commerce\AvailabilityCheckerInterface;
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\commerce\Context;
-use Drupal\xnumber\Utility\Xnumber;
+use Drupal\xnumber\Utility\Xnumber as Numeric;
 
 /**
  * Xquantity availability checker.
@@ -64,7 +64,7 @@ class XquantityStockAvailabilityChecker implements AvailabilityCheckerInterface 
       if (!$xquantity_stock) {
         return;
       }
-      $scale = Xnumber::getDecimalDigits($value);
+      $scale = Numeric::getDecimalDigits($xquantity_stock->getSetting('step'));
       if ($old = $context->getData('old')) {
         // Return some quantity to the stock.
         if ($available = (bccomp($old, $quantity, $scale) !== -1)) {

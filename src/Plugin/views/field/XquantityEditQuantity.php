@@ -6,6 +6,7 @@ use Drupal\commerce\Context;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_cart\Plugin\views\field\EditQuantity;
+use Drupal\xnumber\Utility\Xnumber as Numeric;
 
 /**
  * Overrides a form element for editing the order item quantity.
@@ -74,10 +75,23 @@ class XquantityEditQuantity extends EditQuantity {
       $order_item = $this->getEntity($row);
       /** @var \Drupal\commerce\PurchasableEntityInterface $purchased_entity */
       $purchased_entity = $order_item->getPurchasedEntity();
-      $quantity = $order_item->getQuantity();
-      if (!empty($quantities[$row_index]) && ($quantity != $quantities[$row_index])) {
-        $context = new Context(\Drupal::currentUser(), $order_item->getOrder()->getStore(), time(), ['xquantity' => 'cart', 'old' => $quantity]);
-        $available = $purchased_entity && $availability->check($purchased_entity, $quantities[$row_index], $context);
+      $qty = $order_item->getQuantity();
+      $settings = $order_item->getQuantityWidgetSettings();
+      $scale = Numeric::getDecimalDigits($settings['step']);
+      if (!empty($quantities[$row_index]) && bccomp($qty, $quantities[$row_index], $scale)) {
+        $quantity = $quantities[$row_index];
+        $old = (bccomp($qty, $quantity, $scale) === 1);
+        if ($available = $purchased_entity) {
+          $context = new Context(\Drupal::currentUser(), $order_item->getOrder()->getStore(), time(), [
+            'xquantity' => 'cart',
+            'old' => $old ? $qty : 0,
+          ]);
+          $qty = $old ? $quantity : bcsub($quantity, $qty, $scale);
+          $available = $availability->check($purchased_entity, $qty, $context);
+          if (!$available && $order_item->rotateStock($purchased_entity, $qty, $context)) {
+            $available = $availability->check($purchased_entity, $qty, $context);
+          }
+        }
         if (!$available) {
           $msg = $this->t('Unfortunately, the quantity %quantity of the %label is not available right at the moment.', [
             '%quantity' => $quantity,
