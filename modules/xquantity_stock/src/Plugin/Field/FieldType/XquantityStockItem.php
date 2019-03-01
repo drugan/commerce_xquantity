@@ -38,6 +38,7 @@ class XquantityStockItem extends XdecimalItem {
     $type_id = $this->getEntity()->getOrderItemTypeId();
     $form_display = entity_get_form_display('commerce_order_item', $type_id, 'add_to_cart');
     $quantity = $form_display->getComponent('quantity');
+    $settings = [];
     if (!$quantity) {
       $form_display = entity_get_form_display('commerce_order_item', $type_id, 'default');
       $quantity = $form_display->getComponent('quantity');
@@ -45,16 +46,17 @@ class XquantityStockItem extends XdecimalItem {
     if (isset($quantity['settings']['step'])) {
       $settings = $form_display->getRenderer('quantity')->getFormDisplayModeSettings();
     }
+    $settings += $this->getSettings();
     if (!empty($settings['step'])) {
       $element['step']['#step'] = $settings['step'];
       $element['min']['#step'] = $settings['step'];
       $element['max']['#step'] = $settings['step'];
     }
-    if (!empty($settings['min'])) {
-      $element['step']['#min'] = $settings['min'];
-      $element['min']['#min'] = $settings['min'];
-      $element['max']['#min'] = $settings['min'];
-    }
+    $element['step']['#min'] = $settings['step'];
+    $min = $settings['min'];
+    $min = (!is_numeric($min) || ($min < 0)) && $settings['unsigned'] ? '0' : $min;
+    $element['min']['#min'] = $min;
+    $element['max']['#min'] = $min;
 
     $element['threshold'] = [
       '#type' => 'number',

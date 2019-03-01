@@ -69,11 +69,11 @@ class VariationXquantityStockSet extends ConfigurableActionBase {
           '#type' => 'container',
           '#attributes' => ['class' => ['container-inline']],
         ];
-
+        $min = $settings['min'];
         $form['stock']['set_value'] = [
           '#type' => 'number',
           '#step' => !empty($settings['step']) ? $settings['step'] : pow(0.1, $settings['scale']),
-          '#min' => !empty($settings['min']) ? $settings['min'] : ($settings['unsigned'] ? '0' : ''),
+          '#min' => (!is_numeric($min) || ($min < 0)) && $settings['unsigned'] ? '0' : $min,
         ];
         if (!empty($settings['default_value'])) {
           $form['stock']['set_value']['#default_value'] = $settings['default_value'];
