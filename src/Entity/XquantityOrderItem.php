@@ -2,8 +2,6 @@
 
 namespace Drupal\commerce_xquantity\Entity;
 
-use Drupal\Core\Form\FormState;
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\commerce_order\Entity\OrderItem;
@@ -73,30 +71,19 @@ class XquantityOrderItem extends OrderItem {
     // If 'Add to cart' form display mode is enabled we prefer its settings
     // because exactly those settings are exposed to and used by a customer.
     $form_display = $this->getFormDisplayWidget();
-    $quantity = $form_display->getComponent('quantity');
+    $quantity = $form_display ? $form_display->getComponent('quantity') : NULL;
 
     if (!$quantity) {
       $form_display = $this->getFormDisplayWidget('default');
-      $quantity = $form_display->getComponent('quantity');
+      $quantity = $form_display ? $form_display->getComponent('quantity') : NULL;
     }
 
     if (isset($quantity['settings']['step'])) {
       $settings = $form_display->getRenderer('quantity')->getFormDisplayModeSettings();
     }
     else {
-      // If $settings has no 'step' it means that some unknown mode is used, so
-      // $form_display->getRenderer('quantity')->getSettings() is useless here.
-      // We use $quantity->defaultValuesForm() to get an array with #min, #max,
-      // #step, #field_prefix, #field_suffix and #default_value elements.
-      $form_state = new FormState();
-      $form = [];
-      $form = $this->get('quantity')->defaultValuesForm($form, $form_state);
-      $settings += (array) NestedArray::getValue($form, ['widget', 0, 'value']);
-      // Make prefix/suffix settings accessible through #prefix/#suffix keys.
-      $settings['prefix'] = isset($settings['prefix']) ? $settings['prefix'] : FALSE;
-      $settings['suffix'] = isset($settings['suffix']) ? $settings['suffix'] : FALSE;
-      $settings['prefix'] = $settings['prefix'] ?: (isset($settings['field_prefix']) ? $settings['field_prefix'] : '');
-      $settings['suffix'] = $settings['suffix'] ?: (isset($settings['field_suffix']) ? $settings['field_suffix'] : '');
+      // Fallback if 'default' or 'add_to_cart' form modes don't exist.
+      $settings += (array) $this->get('quantity')->getSettings();
     }
 
     return $settings;
@@ -271,7 +258,9 @@ class XquantityOrderItem extends OrderItem {
    * {@inheritdoc}
    */
   public function getFormDisplayWidget($mode = 'add_to_cart') {
-    return entity_get_form_display($this->getEntityTypeId(), $this->bundle(), $mode);
+    return $this->entityTypeManager()
+      ->getStorage('entity_form_display')
+      ->load("commerce_order_item.{$this->bundle()}.{$mode}");
   }
 
   /**
@@ -290,7 +279,7 @@ class XquantityOrderItem extends OrderItem {
       return;
     }
     $scale = Numeric::getDecimalDigits($xquantity_stock->getSetting('step'));
-    $storage = \Drupal::entityTypeManager()->getStorage('commerce_order');
+    $storage = $this->entityTypeManager()->getStorage('commerce_order');
     $query = $storage->getQuery();
     $query->accessCheck(FALSE);
     $time = time() - $threshold;
@@ -304,7 +293,7 @@ class XquantityOrderItem extends OrderItem {
       $query->condition('order_id', $cart->id(), '<>');
     }
     if ($orders = $query->execute()) {
-      $storage = \Drupal::entityTypeManager()->getStorage('commerce_order_item');
+      $storage = $this->entityTypeManager()->getStorage('commerce_order_item');
       $query = $storage->getQuery();
       $query->accessCheck(FALSE);
       $query->condition('order_id', $orders, 'IN');

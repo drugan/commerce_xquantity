@@ -38,20 +38,9 @@ class VariationXquantityStockSet extends ConfigurableActionBase {
       $xquantity_stock = FALSE;
       foreach (array_reverse($variation->getFieldDefinitions()) as $definition) {
         if ($definition->getType() == 'xquantity_stock') {
-          $xquantity_stock = TRUE;
-          $form_state->set('xquantity_stock', $definition->getName());
-          $settings = [];
-          $type_id = $variation->getOrderItemTypeId();
-          $form_display = entity_get_form_display('commerce_order_item', $type_id, 'add_to_cart');
-          $quantity = $form_display->getComponent('quantity');
-          if (!$quantity) {
-            $form_display = entity_get_form_display('commerce_order_item', $type_id, 'default');
-            $quantity = $form_display->getComponent('quantity');
-          }
-          if (isset($quantity['settings']['step'])) {
-            $settings = $form_display->getRenderer('quantity')->getFormDisplayModeSettings();
-          }
-          $settings += $definition->getFieldStorageDefinition()->getSettings();
+          $xquantity_stock = $definition->getName();
+          $form_state->set('xquantity_stock', $xquantity_stock);
+          $settings = $variation->get($xquantity_stock)->first()->getQuantityWidgetSettings();
           break;
         }
       }

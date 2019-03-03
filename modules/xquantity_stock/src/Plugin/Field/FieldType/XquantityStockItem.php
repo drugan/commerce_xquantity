@@ -35,18 +35,7 @@ class XquantityStockItem extends XdecimalItem {
    */
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
     $element = parent::fieldSettingsForm($form, $form_state);
-    $type_id = $this->getEntity()->getOrderItemTypeId();
-    $form_display = entity_get_form_display('commerce_order_item', $type_id, 'add_to_cart');
-    $quantity = $form_display->getComponent('quantity');
-    $settings = [];
-    if (!$quantity) {
-      $form_display = entity_get_form_display('commerce_order_item', $type_id, 'default');
-      $quantity = $form_display->getComponent('quantity');
-    }
-    if (isset($quantity['settings']['step'])) {
-      $settings = $form_display->getRenderer('quantity')->getFormDisplayModeSettings();
-    }
-    $settings += $this->getSettings();
+    $settings = $this->getQuantityWidgetSettings();
     if (!empty($settings['step'])) {
       $element['step']['#step'] = $settings['step'];
       $element['min']['#step'] = $settings['step'];
@@ -66,10 +55,34 @@ class XquantityStockItem extends XdecimalItem {
       '#description' => $this->t('Stock rotation threshold. Read more: <a href=":href" target="_blank">admin/help/xquantity_stock#stock-rotation</a>', [
         ':href' => '/admin/help/xquantity_stock#stock-rotation',
       ]),
-      '#default_value' => $this->getSetting('threshold'),
+      '#default_value' => $settings['threshold'],
     ];
 
     return $element;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getQuantityWidgetSettings() {
+    $settings = [];
+    // If 'Add to cart' form display mode is enabled we prefer its settings
+    // because exactly those settings are exposed to and used by a customer.
+    $type_id = $this->getEntity()->getOrderItemTypeId();
+    $form_display = \Drupal::entityTypeManager()->getStorage('entity_form_display');
+    $form_display_mode = $form_display->load("commerce_order_item.{$type_id}.add_to_cart");
+    $quantity = $form_display_mode ? $form_display_mode->getComponent('quantity') : NULL;
+
+    if (!$quantity) {
+      $form_display_mode = $form_display->load("commerce_order_item.{$type_id}.default");
+      $quantity = $form_display_mode ? $form_display_mode->getComponent('quantity') : NULL;
+    }
+
+    if (isset($quantity['settings']['step'])) {
+      $settings = $form_display_mode->getRenderer('quantity')->getFormDisplayModeSettings();
+    }
+
+    return $settings + $this->getSettings();
   }
 
   /**

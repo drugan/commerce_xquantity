@@ -39,20 +39,9 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
       $xquantity_stock = FALSE;
       foreach (array_reverse($variation->getFieldDefinitions()) as $definition) {
         if ($definition->getType() == 'xquantity_stock') {
-          $xquantity_stock = TRUE;
-          $form_state->set('xquantity_stock', $definition->getName());
-          $settings = [];
-          $type_id = $variation->getOrderItemTypeId();
-          $form_display = entity_get_form_display('commerce_order_item', $type_id, 'add_to_cart');
-          $quantity = $form_display->getComponent('quantity');
-          if (!$quantity) {
-            $form_display = entity_get_form_display('commerce_order_item', $type_id, 'default');
-            $quantity = $form_display->getComponent('quantity');
-          }
-          if (isset($quantity['settings']['step'])) {
-            $settings = $form_display->getRenderer('quantity')->getFormDisplayModeSettings();
-          }
-          $settings += $definition->getFieldStorageDefinition()->getSettings();
+          $xquantity_stock = $definition->getName();
+          $form_state->set('xquantity_stock', $xquantity_stock);
+          $settings = $variation->get($xquantity_stock)->first()->getQuantityWidgetSettings();
           break;
         }
       }
@@ -64,7 +53,7 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
       else {
         $form_state->set('variations', array_values($variations));
         $form['warning'] = [
-          '#markup' => new TranslatableMarkup('<h1>Adjust Stock Quantity for <span style="color:red">@count</span> variations</h1><mark>Note if the result of adjusting is a negative stock it will be converted to a <span style="color:red">0</span> quantity.</mark>', ['@count' => count($variations)]),
+          '#markup' => new TranslatableMarkup('<h1>Adjust Stock Quantity for <span style="color:red">@count</span> variations</h1><h3>The <em>Steps number</em> adjust type option will be cast to integer in case if the step property on a related order item <em>Quantity</em> field is decimal. Example: with the step <em>1.55</em> if you choose <em>3.1</em> for a number of steps then a stock for each variation will be increased / decreased by <em>1.55 X 3 = 4.65</em> value.<h3><mark>Note if the result of adjusting is a negative stock it will be converted to a <span style="color:red">0</span> quantity.</mark>', ['@count' => count($variations)]),
         ];
         $form['stock'] = [
           '#type' => 'container',
@@ -90,11 +79,12 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
           '#type' => 'select',
           '#options' => [
             'fixed_number'  => $this->t('Fixed Number'),
-            'percentage' => $this->t('Percentage'),
+            'steps_number' => $this->t('Steps number'),
           ],
         ];
         $scale = Numeric::getDecimalDigits($form['stock']['adjust_value']['#step']);
         $form_state->set('xquantity_stock_scale', $scale);
+        $form_state->set('xquantity_stock_step', $form['stock']['adjust_value']['#step']);
       }
       $form['cancel'] = [
         '#type' => 'submit',
@@ -121,13 +111,14 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
       }
       $op = $values['adjust_op'] == 'add' ? 'bcadd' : 'bcsub';
       $scale = $form_state->get('xquantity_stock_scale');
+      $step = $form_state->get('xquantity_stock_step');
       foreach ($form_state->get('variations') as $variation) {
         $stock = $variation->get($xquantity_stock)->value;
         if ($values['adjust_type'] == 'fixed_number') {
           $quantity = $op($stock, $value, $scale);
         }
         else {
-          $quantity = $op($stock, bcmul(bcdiv($stock, '100'), $value), $scale);
+          $quantity = $op($stock, bcmul($step, (int) $value, $scale), $scale);
         }
         $quantity = (bccomp($quantity, '0', $scale) === 1) ? $quantity : '0';
         $variation->set($xquantity_stock, $quantity)->save();
