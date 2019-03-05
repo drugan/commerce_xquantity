@@ -69,9 +69,16 @@ entire order is deleted or canceled. So, applying your own
 outdated _Shopping cart_ deletion strategy you'll return variations quantities
 to their stock back again. Note that module uses the strict stock model and if
 some variation has no positive stock value or the value is insufficient then it
-is considered as _unavailable_ for adding to _Shopping cart_ by a customer:
+is considered as _unavailable_ for adding it to _Shopping cart_ by a customer:
 
 ![Unavailable](images/unavailable.png "Unavailable")
+
+If the _Unavailable quantity_ message is displayed to a customer it is also
+logged to [admin/reports/dblog#](#0 "admin/reports/dblog") so, you can easily
+find those warnings with a link to the out of stock variaiton by filtering all
+messages using the **xquantity_stock** type filter.
+
+![Xquantity Stock DB Log](images/xquantity_stock-dblog.png "Xquantity Stock DB Log")
 
 If you have some specific requirements to which variations stock functionality
 should be applied then you can implement

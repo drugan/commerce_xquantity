@@ -8,8 +8,9 @@ an *Add to cart* form and quantity update field in a *Shopping cart*. Also,
 allows to disable quantity field for a given order item type on
 the [cart#](#0 "Shopping cart page"). More info could be found on
 the [Extended Number Field ↗](https://github.com/drugan/xnumber) module's page,
-on top of which the current module is built.
-
+on top of which the current module is built. Also, the
+submodule [Commerce Extended Quantity Stock ↗](https://github.com/drugan/commerce_xquantity/tree/8.x-1.x/modules/xquantity_stock) can
+be enabled to manage product variation stock.
 
 > Tip: you can see this file in your browser by clicking
 the [admin/help#](#0 "? Help") link at the right of the *Admin toolbar* and then

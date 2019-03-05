@@ -161,11 +161,17 @@ class XquantityAddTocartForm extends AddToCartForm {
         }
       }
       if (!$available) {
-        $msg = $this->t('Unfortunately, the quantity %quantity of the %label is not available right at the moment.', [
+        $args = [
           '%quantity' => $quantity,
           '%label' => $purchased_entity ? $purchased_entity->label() : $this->t('???'),
-        ]);
+          ':href' => $purchased_entity ? $purchased_entity->toUrl()->toString() : '/',
+        ];
+        $msg = $this->t('Unfortunately, the quantity %quantity of the %label is not available right at the moment.', $args);
+
+        \Drupal::logger('xquantity_stock')->warning($this->t('Possibly the <a href=":href">%label</a> with the quantity %quantity is out of stock.', $args));
+
         $purchased_entity && $this->moduleHandler->alter("xquantity_add_to_cart_not_available_msg", $msg, $quantity, $purchased_entity);
+
         $form_state->setErrorByName('quantity', $msg);
       }
     }
