@@ -11,3 +11,4 @@ config_devel:
   install:
     - system.action.variation_xquantity_stock_adjust
     - system.action.variation_xquantity_stock_set
+    - system.action.variation_xquantity_stock_rotate

@@ -9,15 +9,15 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
- * Set variation stock.
+ * Rotate variation stock.
  *
  * @Action(
- *   id = "variation_xquantity_stock_set",
- *   label = @Translation("Set stock"),
+ *   id = "variation_xquantity_stock_rotate",
+ *   label = @Translation("Rotate stock"),
  *   type = "commerce_product_variation"
  * )
  */
-class VariationXquantityStockSet extends ConfigurableActionBase {
+class VariationXquantityStockRotate extends ConfigurableActionBase {
 
   /**
    * {@inheritdoc}
@@ -34,39 +34,39 @@ class VariationXquantityStockSet extends ConfigurableActionBase {
     $storage = \Drupal::service('entity_type.manager')->getStorage('commerce_product_variation');
     if ($ids = explode('|', $request->query->get('ids'))) {
       $variations = $storage->loadMultiple($ids);
-      $variation = reset($variations);
-      $xquantity_stock = FALSE;
-      foreach (array_reverse($variation->getFieldDefinitions()) as $definition) {
-        if ($definition->getType() == 'xquantity_stock') {
-          $xquantity_stock = $definition->getName();
-          $form_state->set('xquantity_stock', $xquantity_stock);
-          $settings = $variation->get($xquantity_stock)->getSettings();
-          break;
+      $xquantity_stock = [];
+      foreach ($variations as $variation) {
+        foreach (array_reverse($variation->getFieldDefinitions()) as $definition) {
+          if ($definition->getType() == 'xquantity_stock') {
+            $xquantity_stock[] = $variation->id();
+            continue 2;
+          }
         }
       }
       if (!$xquantity_stock) {
         $form['warning'] = [
-          '#markup' => new TranslatableMarkup('<h1>To use this functionality you have to add the <span style="color:red">Xquantity Stock</span> field type to the current variation type.</h1>'),
+          '#markup' => new TranslatableMarkup('<h1>To use this functionality you have to have the <span style="color:red">Xquantity Stock</span> field type at least on one of the selected variations.</h1>'),
         ];
       }
       else {
-        $form_state->set('variations', array_values($variations));
+        $form_state->set('variations', $xquantity_stock);
         $form['warning'] = [
-          '#markup' => new TranslatableMarkup('<h1>Set Stock Quantity for <span style="color:red">@count</span> variations</h1>', ['@count' => count($variations)]),
+          '#markup' => new TranslatableMarkup('<h1><a href=":href" target="_blank">Rotate Stock</a> for <span style="color:red">@count</span> variations</h1>', [
+            '@count' => count($variations),
+            ':href' => '/admin/help/xquantity_stock#stock-rotation',
+          ]),
         ];
         $form['stock'] = [
           '#type' => 'container',
           '#attributes' => ['class' => ['container-inline']],
         ];
-        $min = $settings['min'];
-        $form['stock']['set_value'] = [
+        $form['stock']['threshold'] = [
           '#type' => 'number',
-          '#step' => !empty($settings['step']) ? $settings['step'] : pow(0.1, $settings['scale']),
-          '#min' => (!is_numeric($min) || ($min < 0)) && $settings['unsigned'] ? '0' : $min,
+          '#step' => '1',
+          '#field_suffix' => $this->t('seconds', [], ['context' => 'xquantity stock']),
+          '#title' => $this->t('Threshold', [], ['context' => 'xquantity stock']),
+          '#default_value' => 1800,
         ];
-        if (!empty($settings['default_value'])) {
-          $form['stock']['set_value']['#default_value'] = $settings['default_value'];
-        }
       }
       $form['cancel'] = [
         '#type' => 'submit',
@@ -85,14 +85,32 @@ class VariationXquantityStockSet extends ConfigurableActionBase {
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getTriggeringElement()['#id'] != 'edit-cancel') {
-      $values = $form_state->getValues();
-      $xquantity_stock = $form_state->get('xquantity_stock');
-      if (empty($xquantity_stock) || !is_numeric($value = $values['set_value'])) {
-        \Drupal::messenger()->AddError($this->t('The inserted value is not numeric.'));
+      if (!($threshold = $form_state->getValue('threshold')) || !is_numeric($threshold)) {
+        \Drupal::messenger()->AddError($this->t('The inserted threshold is not numeric.'));
         return;
       }
-      foreach ($form_state->get('variations') as $variation) {
-        $variation->set($xquantity_stock, $value)->save();
+      $type_manager = \Drupal::entityTypeManager();
+      $storage = $type_manager->getStorage('commerce_order');
+      $query = $storage->getQuery();
+      $query->accessCheck(FALSE);
+      $time = time() - $threshold;
+      $query->condition('changed', $time, '<');
+      $query->condition('cart', '1', '=');
+      $query->condition('locked', '0', '=');
+      if ($orders = $query->execute()) {
+        $cart_manager = \Drupal::service('commerce_cart.cart_manager');
+        $storage = $type_manager->getStorage('commerce_order_item');
+        foreach ($form_state->get('variations') as $id) {
+          $query = $storage->getQuery();
+          $query->accessCheck(FALSE);
+          $query->condition('order_id', $orders, 'IN');
+          $query->condition('purchased_entity', $id, '=');
+          if ($order_items = $query->execute()) {
+            foreach ($storage->loadMultiple($order_items) as $order_item) {
+              $cart_manager->removeOrderItem($order_item->getOrder(), $order_item);
+            }
+          }
+        }
       }
     }
   }

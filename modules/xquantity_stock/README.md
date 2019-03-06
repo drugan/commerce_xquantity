@@ -46,6 +46,11 @@ abandoned cart of the customer _B_ then this order item will be removed
 releasing this quantity for the customer _A_ . This rotation will continue until
 some of them will complete the order.
 
+If you enable
+the [Commerce Bulk ↗](https://www.drupal.org/project/commerce_bulk) module then
+the variaiton stock can be forcibly rotated by administrator using
+the _Rotate stock_ configurable action. See the image below.
+
 ![Stock rotation](images/stock-rotation.png "Stock rotation")
 
 If multiple variation types use the same common order
@@ -57,11 +62,12 @@ new one:
 
 Then add the stock value for each product variation of this type. If you enable
 the [Commerce Bulk ↗](https://www.drupal.org/project/commerce_bulk) module then
-product variations' stock quantities might be set or adjusted in bulk with
-the _Set stock_ and _Adjust  stock_ configurable actions. Optionally you can add
-this field to the _Variations Tab_ view to display the stock quantities:
+product variations' stock quantities might be set or adjusted or rotated in bulk
+with the _Set stock_ and _Adjust  stock_ and _Rotate  stock_ configurable
+actions. Optionally you can add this field to the _Variations Tab_ view to
+display the stock quantities:
 
-![Bulk set / adjust stock](images/bulk-set-adjust-stock.png "Bulk set / adjust stock")
+![Bulk adjust / rotate / set stock](images/bulk-actions.png "Bulk adjust / rotate / set stock")
 
 The decrease / increase of a variation stock is done automatically whenever the
 variation quantity is updated in a _Shopping cart_ or related order item or

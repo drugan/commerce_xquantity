@@ -5,6 +5,8 @@
  * Install and uninstall functions for the xquantity_stock module.
  */
 
+use Drupal\Component\Serialization\Yaml;
+
 /**
  * Implements hook_uninstall().
  */
@@ -14,11 +16,24 @@ function xquantity_stock_uninstall() {
   $configurations = [
     'system.action.variation_xquantity_stock_adjust',
     'system.action.variation_xquantity_stock_set',
+    'system.action.variation_xquantity_stock_rotate',
   ];
 
   foreach ($configurations as $name) {
     if ($configuration = $config->getEditable($name)) {
       $configuration->delete();
     }
+  }
+}
+
+/**
+ * Install the Rotate stock system action.
+ */
+function xquantity_stock_update_8201() {
+  $config = \Drupal::configFactory();
+  $name = 'system.action.variation_xquantity_stock_rotate';
+  if ($configuration = $config->getEditable($name)) {
+    $data = Yaml::decode(file_get_contents(__DIR__ . "/config/install/{$name}.yml"));
+    $configuration->setData($data)->save();
   }
 }

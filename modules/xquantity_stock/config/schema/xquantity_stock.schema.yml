@@ -4,3 +4,6 @@ action.configuration.variation_xquantity_stock_adjust:
 action.configuration.variation_xquantity_stock_set:
   type: action_configuration_default
   label: 'Configuration for the Set stock action'
+action.configuration.variation_xquantity_stock_rotate:
+  type: action_configuration_default
+  label: 'Configuration for the Rotate stock action'

@@ -41,7 +41,7 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
         if ($definition->getType() == 'xquantity_stock') {
           $xquantity_stock = $definition->getName();
           $form_state->set('xquantity_stock', $xquantity_stock);
-          $settings = $variation->get($xquantity_stock)->first()->getQuantityWidgetSettings();
+          $settings = $variation->get($xquantity_stock)->getSettings();
           break;
         }
       }
@@ -53,7 +53,7 @@ class VariationXquantityStockAdjust extends ConfigurableActionBase {
       else {
         $form_state->set('variations', array_values($variations));
         $form['warning'] = [
-          '#markup' => new TranslatableMarkup('<h1>Adjust Stock Quantity for <span style="color:red">@count</span> variations</h1><h3>The <em>Steps number</em> adjust type option will be cast to integer in case if the step property on a related order item <em>Quantity</em> field is decimal. Example: with the step <em>1.55</em> if you choose <em>3.1</em> for a number of steps then a stock for each variation will be increased / decreased by <em>1.55 X 3 = 4.65</em> value.<h3><mark>Note if the result of adjusting is a negative stock it will be converted to a <span style="color:red">0</span> quantity.</mark>', ['@count' => count($variations)]),
+          '#markup' => new TranslatableMarkup('<h1>Adjust Stock Quantity for <span style="color:red">@count</span> variations</h1><h3>The <em>Steps number</em> adjust type option will be cast to integer in case if the step property on a related order item <em>Quantity</em> field is decimal. Example: with the step <em>1.55</em> if you choose <em>3.1</em> for a number of steps then a stock for each variation will be increased / decreased by <em>1.55 X 3 = 4.65</em> value.<h3><mark>Note if the result of adjusting is a negative stock it will be converted to a <span style="color:red">0</span> stock.</mark>', ['@count' => count($variations)]),
         ];
         $form['stock'] = [
           '#type' => 'container',

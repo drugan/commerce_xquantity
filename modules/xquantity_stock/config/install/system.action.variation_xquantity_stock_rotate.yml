@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - commerce_product
+    - action
+id: variation_xquantity_stock_rotate
+label: 'Rotate stock'
+type: commerce_product_variation
+plugin: variation_xquantity_stock_rotate
+configuration: {  }
