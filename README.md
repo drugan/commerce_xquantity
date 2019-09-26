@@ -194,9 +194,7 @@ And you'd get this:
 
 ## Quantity price adjustments
 
-The module allows to adjust order item price depending on its quantity. An
-alternative module with similar functionality to compare with could be found
-here: [Commerce Pricelist ↗](https://www.drupal.org/node/2784725)
+The module allows to adjust order item price depending on its quantity.
 
 First, set required number of quantity ranges and save the widget settings.
 After that set the quantity _start_ which is the only required field on a range.

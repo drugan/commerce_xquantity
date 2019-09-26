@@ -84,7 +84,8 @@ class XquantityAddTocartForm extends AddToCartForm {
     else {
       $quantity = $order_item->getQuantity();
     }
-    if (property_exists($form_object, 'quantityScale') && $scale = $form_object->quantityScale) {
+    if (property_exists($form_object, 'quantityScale')) {
+      $scale = $form_object->quantityScale ?: 0;
       $order_type_id = $this->orderTypeResolver->resolve($order_item);
       $store = $this->selectStore($purchased_entity);
       $cart = $this->cartProvider->getCart($order_type_id, $store);
