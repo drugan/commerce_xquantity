@@ -20,6 +20,19 @@ class XquantityAddTocartForm extends AddToCartForm {
   protected static $formIds = [];
 
   /**
+   * The quantity adjusted prices.
+   *
+   * @var array
+   */
+  public $quantityPrices = [];
+
+  /**
+   * The quantity scale.
+   *
+   */
+  public $quantityScale;
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
@@ -84,7 +97,7 @@ class XquantityAddTocartForm extends AddToCartForm {
     else {
       $quantity = $order_item->getQuantity();
     }
-    if (property_exists($form_object, 'quantityScale')) {
+    if ($form_object->quantityScale !== NULL) {
       $scale = $form_object->quantityScale ?: 0;
       $order_type_id = $this->orderTypeResolver->resolve($order_item);
       $store = $this->selectStore($purchased_entity);

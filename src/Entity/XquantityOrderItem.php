@@ -115,7 +115,7 @@ class XquantityOrderItem extends OrderItem {
       'product_stores' => $product_stores,
       'current_roles' => \Drupal::currentUser()->getRoles(),
     ];
-    $form_object->quantityPrices = $arguments = [];
+    $arguments = [];
     $form_object->quantityScale = Numeric::getDecimalDigits($settings['step']);
     $formatter = \Drupal::service('commerce_price.currency_formatter');
     // Roll back to an initial price.
@@ -194,8 +194,7 @@ class XquantityOrderItem extends OrderItem {
    */
   public function getQuantityPrice(FormInterface $form_object, PurchasableEntityInterface $purchased_entity, $quantity = NULL) {
     $price = NULL;
-    if (property_exists($form_object, 'quantityPrices')) {
-      $qty_prices = $form_object->quantityPrices;
+    if ($qty_prices = $form_object->quantityPrices) {
       $scale = $form_object->quantityScale ?: 0;
       $product = $purchased_entity->getProduct();
       $product_stores = $product->getStores();
