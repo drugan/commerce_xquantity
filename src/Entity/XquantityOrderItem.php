@@ -194,7 +194,7 @@ class XquantityOrderItem extends OrderItem {
    */
   public function getQuantityPrice(FormInterface $form_object, PurchasableEntityInterface $purchased_entity, $quantity = NULL) {
     $price = NULL;
-    if ($qty_prices = $form_object->quantityPrices) {
+    if (isset($form_object->quantityPrices) && ($qty_prices = $form_object->quantityPrices)) {
       $scale = $form_object->quantityScale ?: 0;
       $product = $purchased_entity->getProduct();
       $product_stores = $product->getStores();
