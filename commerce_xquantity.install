@@ -94,10 +94,10 @@ function commerce_xquantity_install() {
     $entity_type = $update_manager->getEntityType('commerce_order_item');
     $update_manager->installFieldStorageDefinition('quantity', 'commerce_order_item', 'commerce_order', XquantityOrderItem::baseFieldDefinitions($entity_type)['quantity']);
 
-    drupal_set_message(t('The order item quantity field definition has been successfully updated.'));
+    \Drupal::messenger()->addMessage(t('The order item quantity field definition has been successfully updated.'));
   }
   else {
-    drupal_set_message(t("The attempt to update order item quantity field is failed. To update the field manually go to commerce_order_item table in the site's DB and edit quantity field structure changing its Length to 14,4. Then flush caches and set Xnumber field widget for each of the order item type's enabled form display modes."), 'warning');
+    \Drupal::messenger()->addMessage(t("The attempt to update order item quantity field is failed. To update the field manually go to commerce_order_item table in the site's DB and edit quantity field structure changing its Length to 14,4. Then flush caches and set Xnumber field widget for each of the order item type's enabled form display modes."), 'warning');
   }
 }
 
