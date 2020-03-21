@@ -2,6 +2,7 @@ name: 'Commerce Extended Quantity'
 type: module
 description: "Allows to set quantity field's default_value, step, min, max, prefix and suffix on a form display widget."
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: Commerce (contrib)
 dependencies:
   - commerce:commerce_cart
