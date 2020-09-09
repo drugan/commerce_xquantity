@@ -73,7 +73,7 @@ class XquantityTest extends CartBrowserTestBase {
     $this->assertSession()->fieldValueEquals('edit-edit-quantity-0', '1');
 
     // Enable quantity on the 'Add to cart' form mode. Default step = 0.01.
-    $widget = entity_get_form_display('commerce_order_item', 'default', 'add_to_cart');
+    $widget = \Drupal::service('entity_display.repository')->getFormDisplay('commerce_order_item', 'default', 'add_to_cart');
     $widget->setComponent('quantity', [
       'type' => 'xnumber',
     ])->save();
