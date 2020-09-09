@@ -169,9 +169,9 @@ class XquantityAddTocartForm extends AddToCartForm {
           'xquantity' => 'add_to_cart',
         ]);
         $availability = \Drupal::service('commerce.availability_manager');
-        $available = $availability->check($purchased_entity, $quantity, $context);
+        $available = $availability->check($purchased_entity, $context, $quantity);
         if (!$available && $order_item->rotateStock($purchased_entity, $quantity, $context)) {
-          $available = $availability->check($purchased_entity, $quantity, $context);
+          $available = $availability->check($purchased_entity, $context, $quantity);
         }
       }
       if (!$available) {

@@ -147,7 +147,7 @@ class XquantityStockOrderEventSubscriber implements EventSubscriberInterface {
         'old' => $old,
       ]);
       $purchased_entity = $order_item->getPurchasedEntity();
-      $available = $purchased_entity && $this->availabilityManager->check($purchased_entity, $quantity, $context);
+      $available = $purchased_entity && $this->availabilityManager->check($purchased_entity, $context, $quantity);
       if (!$available && $purchased_entity) {
         throw new \InvalidArgumentException("The quantity {$quantity} to update on the {$order_item->getTitle()} order item is not available on the stock.");
       }

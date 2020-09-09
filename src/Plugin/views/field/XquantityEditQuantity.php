@@ -87,9 +87,9 @@ class XquantityEditQuantity extends EditQuantity {
             'old' => $old ? $qty : 0,
           ]);
           $qty = $old ? $quantity : bcsub($quantity, $qty, $scale);
-          $available = $availability->check($purchased_entity, $qty, $context);
+          $available = $availability->check($purchased_entity, $context, $qty);
           if (!$available && $order_item->rotateStock($purchased_entity, $qty, $context)) {
-            $available = $availability->check($purchased_entity, $qty, $context);
+            $available = $availability->check($purchased_entity, $context, $qty);
           }
         }
         if (!$available) {
