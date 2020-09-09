@@ -2,7 +2,7 @@
 
 namespace Drupal\xquantity_stock;
 
-use Drupal\commerce\AvailabilityCheckerInterface;
+use Drupal\commerce_order\AvailabilityCheckerInterface;
 use Drupal\commerce\PurchasableEntityInterface;
 use Drupal\commerce\Context;
 use Drupal\xnumber\Utility\Xnumber as Numeric;
