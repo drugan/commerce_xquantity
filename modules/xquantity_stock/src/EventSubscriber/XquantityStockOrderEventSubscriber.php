@@ -10,7 +10,7 @@ use Drupal\state_machine\Event\WorkflowTransitionEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\commerce\AvailabilityManagerInterface;
+use Drupal\commerce_order\AvailabilityCheckerInterface;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
 
@@ -36,7 +36,7 @@ class XquantityStockOrderEventSubscriber implements EventSubscriberInterface {
   /**
    * The availability manager.
    *
-   * @var \Drupal\commerce\AvailabilityManagerInterface
+   * @var \Drupal\commerce_order\AvailabilityCheckerInterface
    */
   public $availabilityManager;
 
@@ -47,10 +47,10 @@ class XquantityStockOrderEventSubscriber implements EventSubscriberInterface {
    *   The route match.
    * @param \Drupal\Core\Session\AccountProxyInterface $user
    *   The current user.
-   * @param \Drupal\commerce\AvailabilityManagerInterface $availability_manager
+   * @param \Drupal\commerce_order\AvailabilityCheckerInterface $availability_manager
    *   The availability manager.
    */
-  public function __construct(RouteMatchInterface $route_match, AccountProxyInterface $user, AvailabilityManagerInterface $availability_manager) {
+  public function __construct(RouteMatchInterface $route_match, AccountProxyInterface $user, AvailabilityCheckerInterface $availability_manager) {
     $this->routeMatch = $route_match;
     $this->currentUser = $user;
     $this->availabilityManager = $availability_manager;
@@ -147,7 +147,7 @@ class XquantityStockOrderEventSubscriber implements EventSubscriberInterface {
         'old' => $old,
       ]);
       $purchased_entity = $order_item->getPurchasedEntity();
-      $available = $purchased_entity && $this->availabilityManager->check($purchased_entity, $context, $quantity);
+      $available = $purchased_entity && $this->availabilityManager->check($order_item, $context, $quantity);
       if (!$available && $purchased_entity) {
         throw new \InvalidArgumentException("The quantity {$quantity} to update on the {$order_item->getTitle()} order item is not available on the stock.");
       }

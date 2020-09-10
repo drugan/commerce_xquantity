@@ -168,10 +168,10 @@ class XquantityAddTocartForm extends AddToCartForm {
         $context = new Context($this->currentUser, $store, time(), [
           'xquantity' => 'add_to_cart',
         ]);
-        $availability = \Drupal::service('commerce.availability_manager');
-        $available = $availability->check($purchased_entity, $context, $quantity);
+        $availability = \Drupal::service('commerce_order.availability_manager');
+        $available = $availability->check($order_item, $context, $quantity);
         if (!$available && $order_item->rotateStock($purchased_entity, $quantity, $context)) {
-          $available = $availability->check($purchased_entity, $context, $quantity);
+          $available = $availability->check($order_item, $context, $quantity);
         }
       }
       if (!$available) {
