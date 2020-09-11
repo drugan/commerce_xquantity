@@ -6,6 +6,7 @@ use Drupal\commerce\Context;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\commerce_cart\Form\AddToCartForm;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\xnumber\Utility\Xnumber as Numeric;
 
 /**
  * Overrides the order item add to cart form.
@@ -29,6 +30,7 @@ class XquantityAddTocartForm extends AddToCartForm {
   /**
    * The quantity scale.
    *
+   * @var int
    */
   public $quantityScale;
 
@@ -139,11 +141,13 @@ class XquantityAddTocartForm extends AddToCartForm {
     $order_item = $this->entity;
     $settings = $order_item->getQuantityWidgetSettings();
     $default = $step = $settings['step'] ?: $settings['base_step'];
+    $scale = Numeric::getDecimalDigits($step);
     $min = $settings['min'] && $step <= $settings['min'] ? $settings['min'] : $step;
+    $max = $settings['max'] && $step <= $settings['max'] ? $settings['max'] : $step;
     $default = $settings['default_value'] ?: ($settings['base_default_value'] ?: $min);
     $value = $form_state->getValue(['quantity', 0, 'value']);
     // If the value is NULL it means the quantity field is disabled.
-    $quantity = $value !== NULL ? $value : $default;
+    $quantity = $cart_quantity = $value !== NULL ? $value : $default;
 
     if (!$quantity || ($quantity < $min)) {
       $form_state->setErrorByName('quantity', $this->t('The quantity should be no less than %min', [
@@ -187,6 +191,22 @@ class XquantityAddTocartForm extends AddToCartForm {
         $purchased_entity && $this->moduleHandler->alter("xquantity_add_to_cart_not_available_msg", $msg, $quantity, $purchased_entity);
 
         $form_state->setErrorByName('quantity', $msg);
+      }
+      $order_type_id = $this->orderTypeResolver->resolve($order_item);
+      $store = $this->selectStore($purchased_entity);
+      $cart = $this->cartProvider->getCart($order_type_id, $store);
+      if ($cart && ($items = $cart->getItems())) {
+        $matcher = \Drupal::service('commerce_cart.order_item_matcher');
+        if ($item = $matcher->match($order_item, $items)) {
+          $cart_quantity = bcadd($cart_quantity, $item->getQuantity(), $scale);
+        }
+      }
+      if (bccomp($cart_quantity, $max, $scale) === 1) {
+        $form_state->setErrorByName('quantity', $this->t('Only %max items of the %label can be added to the shopping cart. You have %items items left to add.', [
+          '%max' => $max,
+          '%label' => $purchased_entity->label(),
+          '%items' => bcsub($max, bcsub($cart_quantity, $quantity, $scale), $scale),
+        ]));
       }
     }
   }
