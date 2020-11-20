@@ -2,6 +2,7 @@ name: 'Commerce Extended Quantity Stock'
 type: module
 description: "Handles a commerce product variation stock."
 core: 8.x
+core_version_requirement: ^8 || ^9
 package: Commerce (contrib)
 dependencies:
   - drupal:commerce_xquantity
