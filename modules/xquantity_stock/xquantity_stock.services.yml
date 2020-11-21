@@ -1,8 +1,8 @@
 services:
-  xquantity_stock.availability_checker:
-    class: Drupal\xquantity_stock\XquantityStockAvailabilityChecker
-    tags:
-      - { name: commerce_order.availability_checker, priority: -100 }
+#   xquantity_stock.availability_checker:
+#     class: Drupal\xquantity_stock\XquantityStockAvailabilityChecker
+#     tags:
+#       - { name: commerce_order.availability_checker, priority: -100 }
 
   xquantity_stock.order:
     class: Drupal\xquantity_stock\EventSubscriber\XquantityStockOrderEventSubscriber
