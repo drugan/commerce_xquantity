@@ -2,16 +2,13 @@
 
 namespace Drupal\xquantity_stock;
 
-use Drupal\commerce_order\AvailabilityManagerInterface;
-use Drupal\commerce\PurchasableEntityInterface;
+use Drupal\commerce_order\AvailabilityCheckerInterface;
 use Drupal\commerce\Context;
-use Drupal\xnumber\Utility\Xnumber as Numeric;
+use Drupal\commerce_order\AvailabilityResult;
 use Drupal\commerce_order\Entity\OrderItemInterface;
+use Drupal\xnumber\Utility\Xnumber as Numeric;
 
-/**
- * Xquantity availability checker.
- */
-class XquantityStockAvailabilityChecker implements AvailabilityManagerInterface {
+final class XquantityStockAvailabilityChecker implements AvailabilityCheckerInterface {
 
   /**
    * Determines whether the checker applies to the given purchasable entity.
@@ -52,9 +49,12 @@ class XquantityStockAvailabilityChecker implements AvailabilityManagerInterface 
    *   TRUE if the entity is available, FALSE if it's unavailable,
    *   or NULL if it has no opinion.
    */
-  public function check(OrderItemInterface $order_item, Context $context, $quantity = 0) {
+  public function check(OrderItemInterface $order_item, Context $context, $quantity = 0) : AvailabilityResult {
     $entity = $order_item->getPurchasedEntity();
-    $available = $xquantity_stock = NULL;
+    if (!$entity = $order_item->getPurchasedEntity()) {
+      return AvailabilityResult::unavailable('Variation does not exist.');
+    }
+    $available = $xquantity_stock = $value = NULL;
     if ($context->getData('xquantity')) {
       foreach (array_reverse($entity->getFieldDefinitions()) as $definition) {
         if ($definition->getType() == 'xquantity_stock') {
@@ -65,8 +65,9 @@ class XquantityStockAvailabilityChecker implements AvailabilityManagerInterface 
         }
       }
       if (!$xquantity_stock) {
-        return;
+        return AvailabilityResult::neutral();
       }
+
       $scale = Numeric::getDecimalDigits($xquantity_stock->getSetting('step'));
       if ($old = $context->getData('old')) {
         // Return some quantity to the stock.
@@ -92,7 +93,7 @@ class XquantityStockAvailabilityChecker implements AvailabilityManagerInterface 
       \Drupal::moduleHandler()->alter("xquantity_availability_check", $available, $quantity, $context);
     }
 
-    return $available;
+    return $available ? AvailabilityResult::neutral() : AvailabilityResult::unavailable();
   }
 
 }

@@ -1,11 +1,12 @@
 services:
-#   xquantity_stock.availability_checker:
-#     class: Drupal\xquantity_stock\XquantityStockAvailabilityChecker
+  xquantity_stock.availability_checker:
+    class: Drupal\xquantity_stock\XquantityStockAvailabilityChecker
 #     tags:
-#       - { name: commerce_order.availability_checker, priority: -100 }
+#       - { name: commerce_order.availability_checker, priority: 100 }
+
 
   xquantity_stock.order:
     class: Drupal\xquantity_stock\EventSubscriber\XquantityStockOrderEventSubscriber
-    arguments: ['@current_route_match', '@current_user', '@commerce_order.availability_manager']
+    arguments: ['@current_route_match', '@current_user', '@xquantity_stock.availability_checker']
     tags:
       - { name: event_subscriber }

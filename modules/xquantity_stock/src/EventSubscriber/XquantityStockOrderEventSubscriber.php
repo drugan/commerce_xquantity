@@ -11,6 +11,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\commerce_order\AvailabilityManagerInterface;
+use Drupal\commerce_order\AvailabilityCheckerInterface;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderItem;
 
@@ -36,7 +37,7 @@ class XquantityStockOrderEventSubscriber implements EventSubscriberInterface {
   /**
    * The availability manager.
    *
-   * @var \Drupal\commerce_order\AvailabilityManagerInterface
+   * @var \Drupal\commerce_order\AvailabilityCheckerInterface
    */
   public $availabilityManager;
 
@@ -47,10 +48,10 @@ class XquantityStockOrderEventSubscriber implements EventSubscriberInterface {
    *   The route match.
    * @param \Drupal\Core\Session\AccountProxyInterface $user
    *   The current user.
-   * @param \Drupal\commerce_order\AvailabilityManagerInterface $availability_manager
+   * @param \Drupal\commerce_order\AvailabilityCheckerInterface $availability_manager
    *   The availability manager.
    */
-  public function __construct(RouteMatchInterface $route_match, AccountProxyInterface $user, AvailabilityManagerInterface $availability_manager) {
+  public function __construct(RouteMatchInterface $route_match, AccountProxyInterface $user, AvailabilityCheckerInterface $availability_manager) {
     $this->routeMatch = $route_match;
     $this->currentUser = $user;
     $this->availabilityManager = $availability_manager;
@@ -146,9 +147,8 @@ class XquantityStockOrderEventSubscriber implements EventSubscriberInterface {
         'xquantity' => $delete ? 'delete' : 'update',
         'old' => $old,
       ]);
-      $purchased_entity = $order_item->getPurchasedEntity();
-      $available = $purchased_entity && $this->availabilityManager->check($order_item, $context, $quantity);
-      if (!$available && $purchased_entity) {
+      $result = $this->availabilityManager->check($order_item, $context, $quantity);
+      if ($result->isUnavailable()) {
         throw new \InvalidArgumentException("The quantity {$quantity} to update on the {$order_item->getTitle()} order item is not available on the stock.");
       }
     }
