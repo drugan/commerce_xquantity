@@ -69,7 +69,9 @@ class XquantityEditQuantity extends EditQuantity {
    */
   public function viewsFormValidate(array &$form, FormStateInterface $form_state) {
     $quantities = $form_state->getValue($this->options['id'], []);
-    $availability = \Drupal::service('xquantity_stock.availability_checker');
+    if ($availability = $this->moduleHandler->moduleExists('xquantity_stock')) {
+      $availability = \Drupal::service('xquantity_stock.availability_checker');
+    }
     foreach ($this->view->result as $row_index => $row) {
       /** @var \Drupal\commerce_order\Entity\OrderItemInterface $order_item */
       $order_item = $this->getEntity($row);
@@ -81,15 +83,17 @@ class XquantityEditQuantity extends EditQuantity {
       if (!empty($quantities[$row_index]) && bccomp($qty, $quantities[$row_index], $scale)) {
         $quantity = $quantities[$row_index];
         $old = (bccomp($qty, $quantity, $scale) === 1);
-        if ($available = $purchased_entity) {
-          $context = new Context(\Drupal::currentUser(), $order_item->getOrder()->getStore(), time(), [
-            'xquantity' => 'cart',
-            'old' => $old ? $qty : 0,
-          ]);
-          $qty = $old ? $quantity : bcsub($quantity, $qty, $scale);
-          $available = !$availability->check($order_item, $context, $qty)->isUnavailable();
-          if (!$available && $order_item->rotateStock($purchased_entity, $qty, $context)) {
+        if ($available = $purchased_entity && $availability) {
+          if ($availability->applies($order_item)) {
+            $context = new Context(\Drupal::currentUser(), $order_item->getOrder()->getStore(), time(), [
+              'xquantity' => 'cart',
+              'old' => $old ? $qty : 0,
+            ]);
+            $qty = $old ? $quantity : bcsub($quantity, $qty, $scale);
             $available = !$availability->check($order_item, $context, $qty)->isUnavailable();
+            if (!$available && $order_item->rotateStock($purchased_entity, $qty, $context)) {
+              $available = !$availability->check($order_item, $context, $qty)->isUnavailable();
+            }
           }
         }
         if (!$available) {
